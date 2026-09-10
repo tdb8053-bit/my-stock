@@ -7,9 +7,13 @@
   
   <!-- PWA & Mobile Web Capabilities -->
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="資產總管">
   <meta name="theme-color" content="#090d13">
+
+  <!-- 隱藏網址列之 PWA 獨立視窗設定 (Standalone) -->
+  <link rel="manifest" href="data:application/manifest+json;utf-8,%7B%22name%22%3A%22%E8%B3%87%E7%94%A2%E7%B8%BD%E7%AE%A1%22%2C%22short_name%22%3A%22%E8%B3%87%E7%94%A2%E7%B8%BD%E7%AE%A1%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d13%22%2C%22theme_color%22%3A%22%23090d13%22%7D">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -110,8 +114,8 @@
 
     <main class="flex-1 overflow-y-auto no-scrollbar p-3.5 space-y-3.5 pb-24">
 
-      <!-- ================= 頁籤 1: 總覽面板 ================= -->
-      <section id="tab-overview" class="space-y-3.5">
+      <!-- ================= 頁籤 1: 總覽面板 (預設隱藏) ================= -->
+      <section id="tab-overview" class="space-y-3.5 hidden">
         
         <!-- 即時淨本金主卡 (已加上本期損益) -->
         <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#070b14] p-5 border border-slate-700/60 shadow-xl">
@@ -209,8 +213,8 @@
 
       </section>
 
-      <!-- ================= 頁籤 2: 持股總表 ================= -->
-      <section id="tab-holdings" class="space-y-3 hidden">
+      <!-- ================= 頁籤 2: 持股總表 (預設開啟) ================= -->
+      <section id="tab-holdings" class="space-y-3">
         <div class="flex justify-between items-center px-1">
           <div>
             <h2 class="text-sm font-bold text-white">核心持股清單</h2>
@@ -524,15 +528,15 @@
 
     </main>
 
-    <!-- 底部導覽分頁列 (理想5分頁格式) -->
+    <!-- 底部導覽分頁列 (預設高亮持股總表) -->
     <nav class="fixed bottom-0 max-w-[440px] w-full bg-[#161b22]/95 backdrop-blur-md border-t border-gray-800/90 h-16 flex items-center justify-around px-2 z-40 safe-bottom">
-      <button onclick="switchTab('overview')" id="nav-overview" class="flex flex-col items-center justify-center flex-1 py-1 text-cyan-400 transition">
+      <button onclick="switchTab('overview')" id="nav-overview" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 transition">
         <i class="fa-solid fa-chart-pie text-lg"></i>
-        <span class="text-[10px] mt-1 font-bold">總覽</span>
+        <span class="text-[10px] mt-1 font-medium">總覽</span>
       </button>
-      <button onclick="switchTab('holdings')" id="nav-holdings" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 transition">
+      <button onclick="switchTab('holdings')" id="nav-holdings" class="flex flex-col items-center justify-center flex-1 py-1 text-cyan-400 font-bold transition">
         <i class="fa-solid fa-briefcase text-lg"></i>
-        <span class="text-[10px] mt-1 font-medium">持股總表</span>
+        <span class="text-[10px] mt-1 font-bold">持股總表</span>
       </button>
       <button onclick="switchTab('watchlist')" id="nav-watchlist" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 transition">
         <i class="fa-solid fa-list-check text-lg"></i>
@@ -847,14 +851,16 @@
               <div>
                 <div class="flex items-center space-x-2">
                   <span class="font-bold text-white text-sm">${h.name}</span>
-                  <span class="text-[11px] font-mono text-gray-400 bg-gray-800/80 px-1.5 py-0.5 rounded">${h.code}</span>
-                  <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded font-medium">在庫</span>
+                  <!-- 股票代號：採用亮天藍色粗體膠囊風格，與在庫標籤對齊 -->
+                  <span class="text-[11px] font-mono font-bold text-sky-300 bg-sky-500/15 border border-sky-500/30 px-1.5 py-0.5 rounded tracking-wide">${h.code}</span>
+                  <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded font-bold">在庫</span>
                 </div>
                 <div class="text-xs text-gray-400 mt-1">庫存: <span class="text-gray-200 font-mono font-medium">${fmt(h.shares)} 股</span> (${(h.shares/1000).toFixed(1)} 張)</div>
               </div>
               <div class="text-right">
-                <div class="text-base font-extrabold font-mono text-white">${fmtDec(h.currentPrice)}</div>
-                <div class="text-xs font-semibold font-mono ${dayChangeColor}">${daySign}${fmtDec(h.change)}</div>
+                <!-- 即時現價：字體加大 2px 至 18px (text-[18px]) -->
+                <div class="text-[18px] font-black font-mono text-white tracking-tight leading-none">${fmtDec(h.currentPrice)}</div>
+                <div class="text-xs font-semibold font-mono ${dayChangeColor} mt-1">${daySign}${fmtDec(h.change)}</div>
               </div>
             </div>
 
@@ -1256,6 +1262,7 @@
         const input = document.getElementById('sheet-url-input');
         if (input) input.value = `https://docs.google.com/spreadsheets/d/${customSheetId}`;
       }
+      switchTab('holdings'); // 預設開啟持股總表
       updateUI();
       syncDataFromGas(false);
       startAutoRefreshTimer();
