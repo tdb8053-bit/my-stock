@@ -380,21 +380,21 @@
           <div class="overflow-x-auto no-scrollbar">
             <table class="w-full text-left whitespace-nowrap table-fixed">
               <colgroup>
+                <col class="w-[22%]">
+                <col class="w-[25%]">
+                <col class="w-[25%]">
                 <col class="w-[28%]">
-                <col class="w-[23%]">
-                <col class="w-[23%]">
-                <col class="w-[26%]">
               </colgroup>
               <thead>
                 <tr class="text-gray-400 border-b border-gray-800 text-[11px]">
-                  <th class="pb-2 pl-0.5 font-medium text-gray-400 text-left">配息月份</th>
-                  <th class="pb-2 px-0.5 text-right font-medium text-blue-300">
+                  <th class="pb-2.5 pl-1 font-medium text-gray-400 text-left">月份</th>
+                  <th class="pb-2.5 px-1 text-right font-medium text-blue-300">
                     00400A <span class="text-[8px] font-mono text-blue-400/80 bg-blue-950/60 px-0.5 py-0.2 rounded border border-blue-900/60">G9</span>
                   </th>
-                  <th class="pb-2 px-0.5 text-right font-medium text-cyan-300">
+                  <th class="pb-2.5 px-1 text-right font-medium text-cyan-300">
                     00406A <span class="text-[8px] font-mono text-cyan-400/80 bg-cyan-950/60 px-0.5 py-0.2 rounded border border-cyan-900/60">L9</span>
                   </th>
-                  <th class="pb-2 pr-3.5 text-right font-bold text-amber-400">合計入息</th>
+                  <th class="pb-2.5 pr-2.5 text-right font-bold text-amber-400">合計入息</th>
                 </tr>
               </thead>
               <tbody id="monthly-dividends-tbody" class="divide-y divide-gray-800/60 font-mono">
@@ -402,10 +402,10 @@
               </tbody>
               <tfoot>
                 <tr class="border-t border-gray-700 bg-gray-900/40">
-                  <td class="py-2.5 pl-0.5 text-gray-300 font-sans font-bold text-xs">累計入息總計</td>
-                  <td id="div-sum-g" class="py-2.5 px-0.5 text-right font-bold text-blue-300 font-mono text-xs">$34,200</td>
-                  <td id="div-sum-l" class="py-2.5 px-0.5 text-right font-bold text-cyan-300 font-mono text-xs">$28,820</td>
-                  <td id="div-sum-total" class="py-2.5 pr-3.5 text-right font-black text-amber-400 font-mono text-xs sm:text-sm">$63,020</td>
+                  <td class="py-3 pl-1 text-gray-300 font-sans font-bold text-xs">累計入息</td>
+                  <td id="div-sum-g" class="py-3 px-1 text-right font-bold text-blue-300 font-mono text-sm">$34,200</td>
+                  <td id="div-sum-l" class="py-3 px-1 text-right font-bold text-cyan-300 font-mono text-sm">$28,820</td>
+                  <td id="div-sum-total" class="py-3 pr-2.5 text-right font-black text-amber-400 font-mono text-[15px]">$63,020</td>
                 </tr>
               </tfoot>
             </table>
@@ -604,9 +604,9 @@
       ],
       // 00400A 與 00406A 正式精確配息歷史紀錄（基準鎖定，防覆寫）
       monthlyDividends: [
-        { month: '2026年9月', gVal: 12000, lVal: 17940 },
-        { month: '2026年8月', gVal: 12000, lVal: 10880 },
-        { month: '2026年7月', gVal: 10200, lVal: 0 }
+        { month: '2026/09', gVal: 12000, lVal: 17940 },
+        { month: '2026/08', gVal: 12000, lVal: 10880 },
+        { month: '2026/07', gVal: 10200, lVal: 0 }
       ],
       pnlHistory: [
         { date: '07/22', pnl: -696403 },
@@ -769,6 +769,16 @@
       let totalG = 0;
       let totalL = 0;
 
+      // 將月份文字精簡轉換為 YYYY/MM 格式以節省寬度
+      const formatMonth = (mStr) => {
+        if (!mStr) return '';
+        const match = String(mStr).match(/(\d{4})\s*年\s*(\d{1,2})\s*月/);
+        if (match) {
+          return `${match[1]}/${match[2].padStart(2, '0')}`;
+        }
+        return mStr;
+      };
+
       tbody.innerHTML = list.map(item => {
         const g = Number(item.gVal || 0);
         const l = Number(item.lVal || 0);
@@ -777,19 +787,20 @@
         totalG += g;
         totalL += l;
 
+        const displayMonth = formatMonth(item.month);
+
         return `
           <tr class="hover:bg-gray-800/30">
-            <td class="py-2.5 pl-0.5 text-gray-300 font-sans font-medium flex items-center whitespace-nowrap">
-              <span class="w-1 h-1 rounded-full ${subtotal > 0 ? 'bg-cyan-400' : 'bg-gray-600'} mr-1.5 flex-shrink-0"></span>
-              <span class="text-[11px] text-gray-200 tracking-tight">${item.month}</span>
+            <td class="py-3 pl-1 text-gray-300 font-mono text-xs font-semibold whitespace-nowrap">
+              ${displayMonth}
             </td>
-            <td class="py-2.5 px-0.5 text-right font-mono text-xs ${g > 0 ? 'text-blue-300 font-semibold' : 'text-gray-500'}">
+            <td class="py-3 px-1 text-right font-mono text-sm ${g > 0 ? 'text-blue-300 font-semibold' : 'text-gray-500'}">
               ${g > 0 ? '$' + fmt(g) : '-'}
             </td>
-            <td class="py-2.5 px-0.5 text-right font-mono text-xs ${l > 0 ? 'text-cyan-300 font-semibold' : 'text-gray-500'}">
+            <td class="py-3 px-1 text-right font-mono text-sm ${l > 0 ? 'text-cyan-300 font-semibold' : 'text-gray-500'}">
               ${l > 0 ? '$' + fmt(l) : '-'}
             </td>
-            <td class="py-2.5 pr-3.5 text-right font-mono text-xs sm:text-sm ${subtotal > 0 ? 'text-amber-400 font-bold' : 'text-gray-500'}">
+            <td class="py-3 pr-2.5 text-right font-mono text-[15px] ${subtotal > 0 ? 'text-amber-400 font-black' : 'text-gray-500'}">
               ${subtotal > 0 ? '$' + fmt(subtotal) : '-'}
             </td>
           </tr>
