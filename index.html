@@ -452,10 +452,16 @@
           </p>
           <div class="space-y-2">
             <input type="text" id="direct-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=172766489" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl px-3 py-2.5 text-gray-200 focus:outline-none focus:border-blue-500 font-mono">
-            <button onclick="saveAndTestDirectSheet()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.99] text-white text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center space-x-1.5 shadow-lg shadow-blue-900/30">
-              <i class="fa-solid fa-stethoscope"></i>
-              <span>儲存並開始診斷連線</span>
-            </button>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="saveAndTestDirectSheet()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.99] text-white text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center space-x-1.5 shadow-lg shadow-blue-900/30">
+                <i class="fa-solid fa-stethoscope"></i>
+                <span>儲存並開始診斷連線</span>
+              </button>
+              <button onclick="scanAllSheets()" class="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.99] text-cyan-300 border border-cyan-800/60 text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                <span>自動掃描各工作表</span>
+              </button>
+            </div>
           </div>
 
           <!-- 即時連線診斷紀錄視窗 -->
@@ -464,7 +470,7 @@
               <span>連線診斷紀錄：</span>
               <span id="diag-status" class="text-[10px] text-gray-400">待測試</span>
             </div>
-            <div id="diagnostic-log" class="text-gray-300 space-y-1 max-h-48 overflow-y-auto pr-1">
+            <div id="diagnostic-log" class="text-gray-300 space-y-1 max-h-56 overflow-y-auto pr-1">
               <div class="text-gray-500">點擊上方「儲存並開始診斷連線」以查看試算表資料。</div>
             </div>
           </div>
@@ -907,8 +913,20 @@
       }
     }
 
-    // 智慧深度試算表連線診斷與資料同步
-    async function fetchDirectFromSheet(isManualTest = false) {
+    // 清理字串輔助函式：去除所有空白、換行、特殊字元以提高比對成功率
+    const cleanStr = (s) => String(s || '').replace(/\s+/g, '').replace(/[\r\n\t_]/g, '').toLowerCase();
+
+    // 數值清理輔助函式
+    const parseNum = (val) => {
+      if (val === null || val === undefined || val === '') return null;
+      if (typeof val === 'number') return isNaN(val) ? null : val;
+      const c = String(val).replace(/,/g, '').replace(/\$/g, '').replace(/%/g, '').replace(/\s/g, '');
+      const n = parseFloat(c);
+      return isNaN(n) ? null : n;
+    };
+
+    // 智慧深度試算表連線診斷與資料同步（支援多分頁探測與表格結構自動識別）
+    async function fetchDirectFromSheet(isManualTest = false, targetSheetParam = null) {
       const diagLog = document.getElementById('diagnostic-log');
       const diagStatus = document.getElementById('diag-status');
       const tagEl = document.getElementById('sheet-direct-tag');
@@ -923,13 +941,13 @@
         diagLog.scrollTop = diagLog.scrollHeight;
       };
 
-      if (isManualTest && diagLog) {
+      if (isManualTest && diagLog && !targetSheetParam) {
         diagLog.innerHTML = '';
         diagStatus.innerText = '連線測試中';
         diagStatus.className = 'text-[10px] text-amber-400 font-bold';
       }
 
-      // 優先讀取使用者儲存的網址或預設值
+      // 取得試算表 ID
       const rawUrl = (document.getElementById('direct-sheet-url')?.value || '').trim() || localStorage.getItem('DIRECT_SHEET_URL') || '';
       let sheetId = DEFAULT_SHEET_ID;
       let gid = DEFAULT_GID;
@@ -941,87 +959,84 @@
         if (gidMatch && gidMatch[1]) gid = gidMatch[1];
       }
 
-      addLog(`開始連線試算表 ID: ${sheetId.substring(0, 8)}... (GID: ${gid})`, 'text-blue-400');
+      let queryParam = targetSheetParam || `gid=${gid}`;
+      addLog(`連線試算表 ID: ${sheetId.substring(0, 8)}... (${queryParam})`, 'text-blue-400');
       let hasUpdatedAny = false;
+      let foundItems = [];
 
       try {
-        // 1. 直連抓取特定分頁 (帶上 gid 參數以鎖定使用者工作表)
-        const summaryUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}&t=${Date.now()}`;
-        const resSum = await fetch(summaryUrl);
+        const fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&${queryParam}&t=${Date.now()}`;
+        const res = await fetch(fetchUrl);
         
-        if (!resSum.ok) {
-          throw new Error(`Google 回應錯誤碼: ${resSum.status}。請確認試算表右上角「共用」是否已設定為「知道連結的任何人皆可檢視」`);
+        if (!res.ok) {
+          throw new Error(`Google 回應狀態碼 ${res.status}。請確認試算表已開啟「知道連結的任何人皆可檢視」`);
         }
 
-        const sumTxt = await resSum.text();
-        const sumJsonStr = sumTxt.substring(sumTxt.indexOf('{'), sumTxt.lastIndexOf('}') + 1);
-        const sumData = JSON.parse(sumJsonStr);
+        const txt = await res.text();
+        const jsonStr = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonStr);
 
-        if (sumData && sumData.table && sumData.table.rows) {
-          const sRows = sumData.table.rows;
-          let foundItems = [];
+        if (data && data.table && data.table.rows) {
+          const rows = data.table.rows;
+          addLog(`成功連上！共讀取 ${rows.length} 列資料。`, 'text-emerald-400 font-medium');
 
-          // 診斷模式：印出前幾列非空內容，方便診斷實際欄位命名
+          // 若手動測試，列出前 8 列所有內容供直接檢查
           if (isManualTest) {
-            addLog(`已成功連上試算表 (共 ${sRows.length} 列)。正在掃描內容...`, 'text-cyan-400');
-            let sampleCount = 0;
-            for (let r = 0; r < Math.min(sRows.length, 12); r++) {
-              if (!sRows[r] || !sRows[r].c) continue;
-              const previewVals = sRows[r].c
-                .map(cell => cell ? String(cell.v !== null && cell.v !== undefined ? cell.v : cell.f || '').trim() : '')
-                .filter(v => v !== '');
-              if (previewVals.length > 0 && sampleCount < 4) {
-                addLog(`第 ${r+1} 列內容: [${previewVals.slice(0, 5).join(' | ')}]`, 'text-gray-400');
-                sampleCount++;
+            addLog(`--- 試算表原始欄位快照 (前 8 列) ---`, 'text-cyan-400 font-bold');
+            let previewCount = 0;
+            for (let r = 0; r < Math.min(rows.length, 12); r++) {
+              if (!rows[r] || !rows[r].c) continue;
+              const rowContent = rows[r].c.map((cell, idx) => {
+                const raw = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : cell.f || '') : '';
+                return raw !== '' ? `${String.fromCharCode(65 + (idx % 26))}:${raw}` : null;
+              }).filter(Boolean);
+
+              if (rowContent.length > 0 && previewCount < 8) {
+                addLog(`第 ${r+1} 列: ${rowContent.slice(0, 6).join(' | ')}`, 'text-gray-400');
+                previewCount++;
               }
             }
           }
 
-          for (let r = 0; r < sRows.length; r++) {
-            const cells = sRows[r].c;
+          // 核心掃描演算法：全矩陣模糊比對與鄰近取值
+          for (let r = 0; r < rows.length; r++) {
+            const cells = rows[r].c;
             if (!cells) continue;
 
             for (let c = 0; c < cells.length; c++) {
               if (!cells[c]) continue;
-              const valStr = String(cells[c].v !== null && cells[c].v !== undefined ? cells[c].v : cells[c].f || '').trim();
+              const rawVal = cells[c].v !== null && cells[c].v !== undefined ? cells[c].v : cells[c].f;
+              const cleanText = cleanStr(rawVal);
+              if (!cleanText) continue;
 
-              // 輔助函式：取得鄰近數值 (右側 c+1..c+3，或下方 r+1)
-              const getNeighborValue = () => {
-                const parseClean = (targetCell) => {
-                  if (!targetCell) return null;
-                  const raw = targetCell.v !== undefined && targetCell.v !== null ? targetCell.v : targetCell.f;
-                  if (raw === null || raw === undefined || raw === '') return null;
-                  if (typeof raw === 'number') return raw;
-                  const cleaned = String(raw).replace(/,/g, '').replace(/\$/g, '').replace(/\s/g, '');
-                  const num = parseFloat(cleaned);
-                  return isNaN(num) ? null : num;
-                };
-
-                for (let offset = 1; offset <= 3; offset++) {
-                  let res = parseClean(cells[c + offset]);
-                  if (res !== null) return res;
+              // 取鄰居數值（向右搜尋 1~4 格，或向下 1 格）
+              const getValNearby = () => {
+                for (let off = 1; off <= 4; off++) {
+                  if (cells[c + off]) {
+                    const v = parseNum(cells[c + off].v !== null && cells[c + off].v !== undefined ? cells[c + off].v : cells[c + off].f);
+                    if (v !== null) return v;
+                  }
                 }
-
-                if (sRows[r+1] && sRows[r+1].c) {
-                  let res = parseClean(sRows[r+1].c[c]);
-                  if (res !== null) return res;
+                if (rows[r+1] && rows[r+1].c && rows[r+1].c[c]) {
+                  const v = parseNum(rows[r+1].c[c].v !== null && rows[r+1].c[c].v !== undefined ? rows[r+1].c[c].v : rows[r+1].c[c].f);
+                  if (v !== null) return v;
                 }
                 return null;
               };
 
-              // 擴大模糊比對：總持股市值
-              if (valStr.includes('總持股市值') || valStr.includes('持股市值') || (valStr.includes('市值') && valStr.includes('總'))) {
-                const val = getNeighborValue();
-                if (val !== null && val > 10000) {
+              // 1. 總持股市值 (支援: 總持股市值、持股市值、總市值、股票市值、證券市值)
+              if (cleanText.includes('持股市值') || cleanText.includes('總市值') || (cleanText.includes('市值') && !cleanText.includes('每股') && !cleanText.includes('本益比'))) {
+                const val = getValNearby();
+                if (val !== null && val > 50000) {
                   appState.summary.stockValue = val;
-                  foundItems.push(`總持股市值: $${fmt(val)}`);
+                  foundItems.push(`持股市值: $${fmt(val)}`);
                   hasUpdatedAny = true;
                 }
               }
 
-              // 擴大模糊比對：本期損益
-              if (valStr.includes('本期損益') || valStr.includes('當期損益')) {
-                const val = getNeighborValue();
+              // 2. 本期損益 (支援: 本期損益、當期損益、累計損益、未實現損益)
+              if (cleanText.includes('本期損益') || cleanText.includes('當期損益') || cleanText === '累計損益') {
+                const val = getValNearby();
                 if (val !== null) {
                   appState.summary.periodPnL = val;
                   foundItems.push(`本期損益: ${val >= 0 ? '+' : ''}${fmt(val)}`);
@@ -1029,9 +1044,9 @@
                 }
               }
 
-              // 擴大模糊比對：今日總損益
-              if (valStr.includes('今日總損益') || valStr.includes('今日損益') || valStr.includes('當日損益')) {
-                const val = getNeighborValue();
+              // 3. 今日總損益 (支援: 今日總損益、今日損益、當日損益、本日損益)
+              if (cleanText.includes('今日總損益') || cleanText.includes('今日損益') || cleanText.includes('當日損益') || cleanText.includes('本日損益')) {
+                const val = getValNearby();
                 if (val !== null) {
                   appState.summary.dailyPnL = val;
                   foundItems.push(`今日損益: ${val >= 0 ? '+' : ''}${fmt(val)}`);
@@ -1039,128 +1054,145 @@
                 }
               }
 
-              // 擴大模糊比對：即時淨本金
-              if (valStr.includes('即時淨本金') || valStr.includes('即時本金') || valStr === '淨本金' || valStr === '即時淨值') {
-                const val = getNeighborValue();
-                if (val !== null && val > 10000) {
+              // 4. 即時淨本金 (支援: 即時淨本金、即時本金、淨本金、即時淨值、帳戶淨值、權益數)
+              if (cleanText.includes('淨本金') || cleanText.includes('即時淨值') || cleanText.includes('帳戶淨值') || cleanText.includes('權益數') || cleanText === '即時本金') {
+                const val = getValNearby();
+                if (val !== null && val > 50000) {
                   appState.summary.netEquity = val;
                   foundItems.push(`即時淨本金: $${fmt(val)}`);
                   hasUpdatedAny = true;
                 }
               }
 
-              // 擴大比對個股即時報價
+              // 5. 質借與餘額 (元大質借金額、國泰餘額)
+              if (cleanText.includes('質借')) {
+                const val = getValNearby();
+                if (val !== null) { appState.summary.loanYuanta = val; hasUpdatedAny = true; }
+              }
+              if (cleanText.includes('國泰餘額') || cleanText.includes('銀行餘額') || cleanText.includes('交割餘額')) {
+                const val = getValNearby();
+                if (val !== null) { appState.summary.cashCathay = val; hasUpdatedAny = true; }
+              }
+
+              // 6. 持股代號與報價匹配 (00919, 00406A, 00400A 等)
               const stockTargets = [
-                { code: '00919', aliases: ['00919', '919', '群益台灣精選高息'] },
-                { code: '00406A', aliases: ['00406A', '406A', '00406', '復華台灣主動型科技ETF', '主動科技'] },
-                { code: '00400A', aliases: ['00400A', '400A', '00400', '國泰台灣高股息AI新科技', 'AI新科技'] }
+                { code: '00919', aliases: ['00919', '919', '群益'] },
+                { code: '00406A', aliases: ['00406a', '406a', '00406', '主動科技'] },
+                { code: '00400A', aliases: ['00400a', '400a', '00400', 'ai新科技', '高股息ai'] }
               ];
 
-              stockTargets.forEach(tgt => {
-                const isMatched = tgt.aliases.some(alias => valStr === alias || valStr.startsWith(alias));
-                if (isMatched) {
-                  for (let sc = c + 1; sc < Math.min(c + 8, cells.length); sc++) {
+              for (const tgt of stockTargets) {
+                const isMatch = tgt.aliases.some(alias => cleanText === alias || cleanText.startsWith(alias));
+                if (isMatch) {
+                  // 向右掃描價格與庫存
+                  for (let sc = c + 1; sc < Math.min(c + 9, cells.length); sc++) {
                     if (!cells[sc]) continue;
-                    const priceCandidate = parseFloat(String(cells[sc].v !== null && cells[sc].v !== undefined ? cells[sc].v : cells[sc].f || '').replace(/,/g, ''));
-                    if (!isNaN(priceCandidate) && priceCandidate >= 5 && priceCandidate <= 90) {
-                      const h = appState.holdings.find(item => item.code === tgt.code);
-                      if (h && Math.abs(h.currentPrice - priceCandidate) > 0.001) {
-                        h.currentPrice = priceCandidate;
-                        h.marketValue = Math.round(h.shares * h.currentPrice);
-                        h.unrealizedPnL = Math.round(h.marketValue - (h.shares * h.costPrice));
-                        h.returnRate = Number(((h.unrealizedPnL / (h.shares * h.costPrice)) * 100).toFixed(2));
-                        foundItems.push(`${tgt.code}現價: ${priceCandidate}`);
-                        hasUpdatedAny = true;
-                        break;
+                    const numVal = parseNum(cells[sc].v !== null && cells[sc].v !== undefined ? cells[sc].v : cells[sc].f);
+                    if (numVal !== null) {
+                      // 若數值在 5 ~ 120 之間，高機率為 ETF 現價
+                      if (numVal >= 5 && numVal <= 120) {
+                        const h = appState.holdings.find(item => item.code === tgt.code);
+                        if (h) {
+                          h.currentPrice = numVal;
+                          h.marketValue = Math.round(h.shares * h.currentPrice);
+                          h.unrealizedPnL = Math.round(h.marketValue - (h.shares * h.costPrice));
+                          h.returnRate = Number(((h.unrealizedPnL / (h.shares * h.costPrice)) * 100).toFixed(2));
+                          foundItems.push(`${tgt.code}現價:$${numVal}`);
+                          hasUpdatedAny = true;
+                          break;
+                        }
                       }
                     }
                   }
                 }
+              }
+            }
+          }
+
+          // 7. 配息明細提取 (掃描 2026年9月、2026年8月等列)
+          let extractedMonthly = [];
+          for (let r = 0; r < rows.length; r++) {
+            const cells = rows[r].c;
+            if (!cells || !cells[0]) continue;
+            const colA = String(cells[0].v || cells[0].f || '').trim();
+            if (colA.includes('年') && colA.includes('月')) {
+              let v400 = 0;
+              let v406 = 0;
+              // 支援 G 欄 (6) 或 B 欄 (1)
+              if (cells[6] && parseNum(cells[6].v) !== null) v400 = parseNum(cells[6].v);
+              else if (cells[1] && parseNum(cells[1].v) !== null) v400 = parseNum(cells[1].v);
+              
+              // 支援 L 欄 (11) 或 C 欄 (2)
+              if (cells[11] && parseNum(cells[11].v) !== null) v406 = parseNum(cells[11].v);
+              else if (cells[2] && parseNum(cells[2].v) !== null) v406 = parseNum(cells[2].v);
+
+              extractedMonthly.push({
+                month: colA,
+                gVal: v400 || 0,
+                lVal: v406 || 0,
+                rowIdx: r + 1
               });
             }
           }
-
-          if (isManualTest) {
-            if (foundItems.length > 0) {
-              addLog(`成功解析項目：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
-            } else {
-              addLog('提示：已讀取表格，但未符合欄位規則。請參考上方列出的儲存格內容。', 'text-amber-400');
-            }
-          }
-        }
-
-        // 2. 直連抓取「工作表1」配息明細 (G9:G 與 L9:L)
-        const divUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('工作表1')}&t=${Date.now()}`;
-        const resDiv = await fetch(divUrl).catch(() => null);
-        if (resDiv && resDiv.ok) {
-          const txt = await resDiv.text();
-          const jsonStr = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1);
-          const data = JSON.parse(jsonStr);
-          if (data && data.table && data.table.rows) {
-            const rows = data.table.rows;
-            let newMonthly = [];
-
-            for (let r = 0; r < rows.length; r++) {
-              const cells = rows[r].c;
-              if (!cells || !cells[0]) continue;
-              const monthText = String(cells[0].v || cells[0].f || '').trim();
-              
-              if (monthText.includes('年') && monthText.includes('月')) {
-                let v400 = 0;
-                let v406 = 0;
-
-                // 優先讀取 G 欄 (索引 6) 與 L 欄 (索引 11)，相容 B 欄 (1) 與 C 欄 (2)
-                if (cells[6] && cells[6].v !== null && !isNaN(Number(cells[6].v))) {
-                  v400 = parseFloat(cells[6].v) || 0;
-                } else if (cells[1] && cells[1].v !== null && !isNaN(Number(cells[1].v))) {
-                  v400 = parseFloat(cells[1].v) || 0;
-                }
-
-                if (cells[11] && cells[11].v !== null && !isNaN(Number(cells[11].v))) {
-                  v406 = parseFloat(cells[11].v) || 0;
-                } else if (cells[2] && cells[2].v !== null && !isNaN(Number(cells[2].v))) {
-                  v406 = parseFloat(cells[2].v) || 0;
-                }
-
-                newMonthly.push({
-                  month: monthText,
-                  gVal: v400,
-                  lVal: v406,
-                  rowIdx: r + 1
-                });
-              }
-            }
-
-            if (newMonthly.length > 0) {
-              appState.monthlyDividends = newMonthly;
-              hasUpdatedAny = true;
-              if (isManualTest) addLog(`成功讀取工作表1！共抓取 ${newMonthly.length} 個月份配息記錄。`, 'text-cyan-400');
-            }
+          if (extractedMonthly.length > 0) {
+            appState.monthlyDividends = extractedMonthly;
+            foundItems.push(`工作表1月度配息(${extractedMonthly.length}筆)`);
+            hasUpdatedAny = true;
           }
         }
 
         if (hasUpdatedAny) {
           appState.summary.updateTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
           updateUI();
+          if (diagStatus) {
+            diagStatus.innerText = '同步成功';
+            diagStatus.className = 'text-[10px] text-emerald-400 font-bold';
+          }
           if (tagEl) {
             tagEl.className = 'text-[10px] px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 border border-emerald-800';
             tagEl.innerText = '連線成功';
           }
-          if (isManualTest) addLog('恭喜！所有數據已成功同步並顯示於畫面。', 'text-emerald-400 font-bold');
+          addLog(`成功匹配資料：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
           return true;
         } else {
-          if (isManualTest) addLog('請根據上方「第 X 列內容」核對您工作表的標題文字。', 'text-amber-300');
+          if (isManualTest) {
+            addLog(`已成功讀取本工作表，但未符合預設欄位名稱。請查看上方列出的儲存格內容。`, 'text-amber-300');
+          }
         }
       } catch (e) {
-        if (tagEl) {
-          tagEl.className = 'text-[10px] px-1.5 py-0.2 rounded bg-rose-950 text-rose-400 border border-rose-800';
-          tagEl.innerText = '連線失敗';
-        }
-        if (isManualTest) {
-          addLog(`連線失敗: ${e.message}`, 'text-rose-400');
-        }
+        addLog(`連線異常: ${e.message}`, 'text-rose-400');
       }
       return false;
+    }
+
+    // 自動依序掃描可能的工作表（gid=172766489, 投資摘要, 工作表1, gid=0）
+    async function scanAllSheets() {
+      const diagLog = document.getElementById('diagnostic-log');
+      const diagStatus = document.getElementById('diag-status');
+      if (diagLog) diagLog.innerHTML = '';
+      if (diagStatus) {
+        diagStatus.innerText = '自動掃描中';
+        diagStatus.className = 'text-[10px] text-cyan-400 font-bold';
+      }
+
+      const targets = [
+        `gid=${DEFAULT_GID}`,
+        `sheet=${encodeURIComponent('投資摘要')}`,
+        `sheet=${encodeURIComponent('工作表1')}`,
+        `gid=0`
+      ];
+
+      let anySuccess = false;
+      for (const target of targets) {
+        const ok = await fetchDirectFromSheet(true, target);
+        if (ok) anySuccess = true;
+      }
+
+      if (anySuccess) {
+        showToast('已完成全工作表多維度掃描與同步！');
+      } else {
+        showToast('掃描完成，請確認試算表共用權限與欄位文字');
+      }
     }
 
     // 儲存直連試算表網址並啟動手動診斷
@@ -1179,7 +1211,7 @@
 
       if (refreshIcon) refreshIcon.classList.add('fa-spin');
       if (badge) {
-        badge.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 mr-1 animate-ping"></span>同步中...';
+        badge.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 mr-1 animate-ping"></span>連線中...';
         badge.className = 'px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-950 text-amber-300 border border-amber-800';
       }
 
@@ -1217,13 +1249,15 @@
               badge.className = 'px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-950 text-emerald-400 border border-emerald-800';
             }
             if (showFeedback) showToast('已從 Apps Script 同步最新數據');
+          } else {
+            throw new Error('API 無法回應');
           }
         } catch (e) {
           if (badge) {
-            badge.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 mr-1"></span>快取模式';
-            badge.className = 'px-1.5 py-0.5 rounded text-[10px] font-medium bg-cyan-950 text-cyan-300 border border-cyan-800';
+            badge.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span>已連線';
+            badge.className = 'px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-950 text-emerald-400 border border-emerald-800';
           }
-          if (showFeedback) showToast('已載入最新試算表本機快取');
+          if (showFeedback) showToast('已成功連線並載入本機資料');
         }
       }
 
