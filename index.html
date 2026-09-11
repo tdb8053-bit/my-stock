@@ -596,7 +596,7 @@
         { code: '0056', name: '元大高股息', price: 41.20, change: -0.10, pct: '-0.24%', mktCap: '3,400億' },
         { code: '00878', name: '國泰永續高股息', price: 23.45, change: -0.05, pct: '-0.21%', mktCap: '3,600億' }
       ],
-      // 00400A 與 00406A 實際配息歷史紀錄
+      // 00400A 與 00406A 正式精確配息歷史紀錄（基準鎖定，防覆寫）
       monthlyDividends: [
         { month: '2026年9月', gVal: 12000, lVal: 17940 },
         { month: '2026年8月', gVal: 12000, lVal: 10880 },
@@ -1106,41 +1106,44 @@
             }
           }
 
-          // 7. 工作表1月度配息明細精確解析（防呆過濾 2024~2027 年份數字）
-          let extractedMonthly = [];
-          for (let r = 0; r < rows.length; r++) {
-            const cells = rows[r].c;
-            if (!cells || !cells[0]) continue;
-            const colA = String(cells[0].v || cells[0].f || '').trim();
-            if (colA.includes('年') && colA.includes('月')) {
-              let v400 = 0;
-              let v406 = 0;
+          // 7. 月度配息明細解析防護：主總表 (gid=632679711) 專注更新行情與資金，絕不覆寫配息明細
+          // 僅有在明確指定存股配息分頁時，且符合驗證格式時才允許更新
+          const isTargetingDividendsTab = queryParam.includes('存股配息') || queryParam.includes('工作表1') || queryParam.includes('gid=172766489');
+          if (isTargetingDividendsTab) {
+            let extractedMonthly = [];
+            for (let r = 0; r < rows.length; r++) {
+              const cells = rows[r].c;
+              if (!cells || !cells[0]) continue;
+              const colA = String(cells[0].v || cells[0].f || '').trim();
+              if (colA.includes('年') && colA.includes('月')) {
+                let v400 = 0;
+                let v406 = 0;
 
-              // G 欄 (index 6)
-              if (cells[6] && parseNum(cells[6].v) !== null) {
-                const num = parseNum(cells[6].v);
-                if (num !== 2024 && num !== 2025 && num !== 2026 && num !== 2027) v400 = num;
-              }
-              
-              // L 欄 (index 11)
-              if (cells[11] && parseNum(cells[11].v) !== null) {
-                const num = parseNum(cells[11].v);
-                if (num !== 2024 && num !== 2025 && num !== 2026 && num !== 2027) v406 = num;
-              }
+                // G 欄 (index 6) 與 L 欄 (index 11) 防呆過濾年份數字
+                if (cells[6] && parseNum(cells[6].v) !== null) {
+                  const num = parseNum(cells[6].v);
+                  if (num > 0 && num < 100000 && num !== 2024 && num !== 2025 && num !== 2026 && num !== 2027) v400 = num;
+                }
+                
+                if (cells[11] && parseNum(cells[11].v) !== null) {
+                  const num = parseNum(cells[11].v);
+                  if (num > 0 && num < 100000 && num !== 2024 && num !== 2025 && num !== 2026 && num !== 2027) v406 = num;
+                }
 
-              if (v400 > 0 || v406 > 0) {
-                extractedMonthly.push({
-                  month: colA,
-                  gVal: v400,
-                  lVal: v406
-                });
+                if (v400 > 0 || v406 > 0) {
+                  extractedMonthly.push({
+                    month: colA,
+                    gVal: v400,
+                    lVal: v406
+                  });
+                }
               }
             }
-          }
-          if (extractedMonthly.length > 0) {
-            appState.monthlyDividends = extractedMonthly;
-            foundItems.push(`月度配息(${extractedMonthly.length}筆)`);
-            hasUpdatedAny = true;
+            if (extractedMonthly.length >= 2) {
+              appState.monthlyDividends = extractedMonthly;
+              foundItems.push(`月度配息(${extractedMonthly.length}筆)`);
+              hasUpdatedAny = true;
+            }
           }
         }
 
