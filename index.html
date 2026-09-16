@@ -293,19 +293,19 @@
       </section>
 
       <!-- ================= 頁籤 4: 存股配息與複利 ================= -->
-      <section id="tab-dividends" class="space-y-3.5 hidden">
-        <div class="bg-gradient-to-br from-indigo-950/60 via-[#161b22] to-[#0d1117] border border-indigo-500/30 rounded-2xl px-6 py-4.5 space-y-3 shadow-lg">
+        <!-- 存股配息與複利 -->
+        <div class="bg-gradient-to-br from-indigo-950/60 via-[#161b22] to-[#0d1117] border border-indigo-500/30 rounded-2xl p-4 space-y-3 shadow-lg">
           <div class="flex justify-between items-center">
             <span class="text-sm font-semibold text-indigo-300 tracking-wider flex items-center">
               <i class="fa-solid fa-hand-holding-dollar mr-1.5 text-amber-400"></i>在庫存股累積總配息
             </span>
-            <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">
               3 檔在庫存股
             </span>
           </div>
-          <div class="flex items-baseline justify-between px-2">
-            <div class="text-3xl font-black text-amber-400 font-mono tracking-tight" id="div-total-collected">$738,459</div>
-            <div class="text-sm text-gray-400">預估年領息 <span class="text-emerald-400 font-bold font-mono" id="div-est-annual">$934,200</span></div>
+          <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+            <div class="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight" id="div-total-collected">$737,279</div>
+            <div class="text-xs sm:text-sm text-gray-400">預估年領息 <span class="text-emerald-400 font-bold font-mono" id="div-est-annual">$934,200</span></div>
           </div>
         </div>
 
@@ -1279,19 +1279,13 @@
                   h.currentPrice = priceVal;
                   foundItems.push(`${targetCode}現價:${priceVal}`);
                 }
-                if (changeVal !== null) {
-                  h.change = changeVal;
-                  foundItems.push(`${targetCode}漲跌:${changeVal}`);
-                }
-              }
-            }
-          }
-
-          // 3. 專屬存股配息格位解析 (00919: B6, 00400A: G9:G, 00406A: L10:L)
-          // 檢查 B6 (row 5, col 1) 00919 配息
-          if (rows[5] && rows[5].c && rows[5].c[1]) {
+          // 3. 專屬存股配息格位解析 (僅在「存股配息」分頁或具備配息標籤時才讀取，嚴格加上防呆)
+          const isDividendSheet = targetSheetParam && targetSheetParam.includes('存股配息');
+          
+          // 檢查 B6 (row 5, col 1) 00919 配息 (只有數值在合理配息範圍 10萬~200萬 之間才採納)
+          if (isDividendSheet && rows[5] && rows[5].c && rows[5].c[1]) {
             const b6Val = parseNum(rows[5].c[1].v !== null ? rows[5].c[1].v : rows[5].c[1].f);
-            if (b6Val !== null && b6Val > 50000) {
+            if (b6Val !== null && b6Val >= 50000 && b6Val <= 2000000) {
               const h919 = appState.holdings.find(item => item.code === '00919');
               if (h919) {
                 h919.totalDividends = b6Val;
@@ -1300,42 +1294,48 @@
             }
           }
 
-          // 解析 G9:G (col G = index 6, row index >= 8) 與 L10:L (col L = index 11, row index >= 9)
-          let sumG = 0;
-          let sumL = 0;
-          let parsedMonthly = [];
+          // 解析 G9:G 與 L10:L (必須確認是存股配息分頁，且單筆入息小於 10 萬元，絕不誤抓幾百萬的股票市值)
+          if (isDividendSheet) {
+            let sumG = 0;
+            let sumL = 0;
+            let parsedMonthly = [];
 
-          for (let r = 8; r < Math.min(rows.length, 30); r++) {
-            const cells = rows[r]?.c;
-            if (!cells) continue;
-            
-            const gVal = parseNum(cells[6]?.v !== null ? cells[6]?.v : cells[6]?.f) || 0;
-            const lVal = (r >= 9) ? (parseNum(cells[11]?.v !== null ? cells[11]?.v : cells[11]?.f) || 0) : 0;
-            const monthLabel = cells[0]?.v || cells[0]?.f || `第${r - 7}期`;
+            for (let r = 8; r < Math.min(rows.length, 30); r++) {
+              const cells = rows[r]?.c;
+              if (!cells) continue;
+              
+              const gVal = parseNum(cells[6]?.v !== null ? cells[6]?.v : cells[6]?.f) || 0;
+              const lVal = (r >= 9) ? (parseNum(cells[11]?.v !== null ? cells[11]?.v : cells[11]?.f) || 0) : 0;
+              const monthLabel = cells[0]?.v || cells[0]?.f || `第${r - 7}期`;
 
-            if (gVal > 0 || lVal > 0) {
-              sumG += gVal;
-              sumL += lVal;
-              parsedMonthly.push({ month: String(monthLabel).trim(), gVal: gVal, lVal: lVal });
-            }
-          }
+              // 配息單月合理範圍通常在 1,000 ~ 80,000 之間，若大於 15 萬必定是抓錯欄位
+              const validG = (gVal > 0 && gVal < 150000) ? gVal : 0;
+              const validL = (lVal > 0 && lVal < 150000) ? lVal : 0;
 
-          if (sumG > 0) {
-            const h400 = appState.holdings.find(item => item.code === '00400A');
-            if (h400) {
-              h400.totalDividends = sumG;
-              foundItems.push(`00400A配息(G9:G):$${fmt(sumG)}`);
+              if (validG > 0 || validL > 0) {
+                sumG += validG;
+                sumL += validL;
+                parsedMonthly.push({ month: String(monthLabel).trim(), gVal: validG, lVal: validL });
+              }
             }
-          }
-          if (sumL > 0) {
-            const h406 = appState.holdings.find(item => item.code === '00406A');
-            if (h406) {
-              h406.totalDividends = sumL;
-              foundItems.push(`00406A配息(L10:L):$${fmt(sumL)}`);
+
+            if (sumG > 0 && sumG < 500000) {
+              const h400 = appState.holdings.find(item => item.code === '00400A');
+              if (h400) {
+                h400.totalDividends = sumG;
+                foundItems.push(`00400A配息(G9:G):$${fmt(sumG)}`);
+              }
             }
-          }
-          if (parsedMonthly.length > 0) {
-            appState.monthlyDividends = parsedMonthly;
+            if (sumL > 0 && sumL < 500000) {
+              const h406 = appState.holdings.find(item => item.code === '00406A');
+              if (h406) {
+                h406.totalDividends = sumL;
+                foundItems.push(`00406A配息(L10:L):$${fmt(sumL)}`);
+              }
+            }
+            if (parsedMonthly.length > 0) {
+              appState.monthlyDividends = parsedMonthly;
+            }
           }
 
           // 4. 全表智慧關鍵字掃描備援 (即時本金、本期損益、交割戶、質借等)
@@ -1653,13 +1653,29 @@
 
     // 初始化啟動
     window.addEventListener('DOMContentLoaded', () => {
+      // 清除手機端可能殘留的舊有異常快取
+      try {
+        const storedDirect = localStorage.getItem('DIRECT_SHEET_URL');
+        if (storedDirect && storedDirect.includes('172766489')) {
+          localStorage.removeItem('DIRECT_SHEET_URL');
+        }
+      } catch (e) {}
+
       let savedUrl = localStorage.getItem('DIRECT_SHEET_URL') || '';
-      if (!savedUrl || savedUrl.includes('172766489')) {
+      if (!savedUrl) {
         savedUrl = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/edit?gid=632679711#gid=632679711`;
         localStorage.setItem('DIRECT_SHEET_URL', savedUrl);
       }
       const urlInput = document.getElementById('direct-sheet-url');
       if (urlInput) urlInput.value = savedUrl;
+
+      // 重設正確的預設配息數據，防止手機舊快取汙染
+      const h919 = appState.holdings.find(h => h.code === '00919');
+      const h406 = appState.holdings.find(h => h.code === '00406A');
+      const h400 = appState.holdings.find(h => h.code === '00400A');
+      if (h919) h919.totalDividends = 674259;
+      if (h406) h406.totalDividends = 28820;
+      if (h400) h400.totalDividends = 34200;
 
       switchTab('holdings');
       updateUI(false);
