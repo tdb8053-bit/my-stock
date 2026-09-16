@@ -613,19 +613,19 @@
     const DEFAULT_SHEET_ID = '12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs';
     const DEFAULT_GID = '632679711';
 
-    // 核心資料狀態庫 (具備自動連動重算機制)
+    // 核心資料狀態庫：對應試算表最新實盤報價 (A16: 00919 $31.99, A15: 00406A $9.34, A14: 00400A $14.52)
     let appState = {
       summary: {
         initialCapital: 5631250,
-        netEquity: 7503723,
-        stockValue: 7278500,
-        periodPnL: -27527,
-        dailyPnL: 48900,
+        netEquity: 7447486,
+        stockValue: 7215900,
+        periodPnL: -90127,
+        dailyPnL: -96500,
         loanYuanta: 1900000,
         cashCathay: 131586,
         realizedPnL: 110985,
         updateTime: '載入中...',
-        quoteSource: '市場即時引擎'
+        quoteSource: '試算表直連與市場引擎'
       },
       holdings: [
         {
@@ -634,12 +634,12 @@
           shares: 150000,
           costPrice: 19.943,
           costTotal: 2991450,
-          currentPrice: 32.89,
-          prevClose: 32.48,
-          change: +0.41,
-          marketValue: 4933500,
-          unrealizedPnL: 1942050,
-          returnRate: 64.92,
+          currentPrice: 31.99, // A16=00919, B16=31.99
+          prevClose: 32.74,
+          change: -0.75,       // C16=-0.75
+          marketValue: 4798500,
+          unrealizedPnL: 1807050,
+          returnRate: 60.41,
           totalDividends: 674259
         },
         {
@@ -648,12 +648,12 @@
           shares: 150000,
           costPrice: 9.275,
           costTotal: 1391250,
-          currentPrice: 9.39,
-          prevClose: 9.44,
-          change: -0.05,
-          marketValue: 1408500,
-          unrealizedPnL: 17250,
-          returnRate: 1.24,
+          currentPrice: 9.34,  // A15=00406A, B15=9.34
+          prevClose: 9.28,
+          change: +0.06,       // C15=0.06
+          marketValue: 1401000,
+          unrealizedPnL: 9750,
+          returnRate: 0.70,
           totalDividends: 30000
         },
         {
@@ -662,19 +662,19 @@
           shares: 70000,
           costPrice: 14.79,
           costTotal: 1034966,
-          currentPrice: 14.72,
-          prevClose: 14.80,
-          change: -0.08,
-          marketValue: 1030400,
-          unrealizedPnL: -4566,
-          returnRate: -0.44,
+          currentPrice: 14.52, // A14=00400A, B14=14.52
+          prevClose: 14.42,
+          change: +0.10,       // C14=0.1
+          marketValue: 1016400,
+          unrealizedPnL: -18566,
+          returnRate: -1.79,
           totalDividends: 34200
         }
       ],
       watchlist: [
-        { code: '00919', name: '群益台灣精選高息', price: 32.89, change: +0.41, pct: '+1.26%', mktCap: '3,100億' },
-        { code: '00400A', name: '主動國泰動能高息', price: 14.72, change: -0.08, pct: '-0.54%', mktCap: '85億' },
-        { code: '00406A', name: '主動中信台灣收益', price: 9.39, change: -0.05, pct: '-0.53%', mktCap: '96億' },
+        { code: '00919', name: '群益台灣精選高息', price: 31.99, change: -0.75, pct: '-2.29%', mktCap: '3,100億' },
+        { code: '00400A', name: '主動國泰動能高息', price: 14.52, change: +0.10, pct: '+0.69%', mktCap: '85億' },
+        { code: '00406A', name: '主動中信台灣收益', price: 9.34, change: +0.06, pct: '+0.65%', mktCap: '96億' },
         { code: '00403A', name: '統一主動型', price: 10.34, change: +0.08, pct: '+0.78%', mktCap: '64億' },
         { code: '4977', name: '眾達-KY', price: 173.00, change: +2.50, pct: '+1.47%', mktCap: '128億' },
         { code: '0050', name: '元大台灣50', price: 215.80, change: -1.20, pct: '-0.55%', mktCap: '4,200億' },
@@ -1151,25 +1151,11 @@
         logDiag(`公開市場報價代理等待逾時或受阻 (${err.message})，自動切換至備援行情引擎`, 'text-amber-400');
       }
 
-      // 若未連上外網代理或主動型 ETF 未收錄，執行高精準備援行情微跳動模擬更新 (維持盤中真實跳動體驗)
-      if (updatedCount < 2) {
-        appState.holdings.forEach(h => {
-          // 在合理微小區間跳動，模擬真實撮合
-          const jitter = (Math.random() * 0.04 - 0.02);
-          const newPrice = Number((h.currentPrice + jitter).toFixed(2));
-          if (newPrice > 0) {
-            h.change = Number((h.change + jitter).toFixed(2));
-            h.currentPrice = newPrice;
-          }
-        });
-        logDiag('已觸發即時報價防休眠動態維護引擎', 'text-cyan-400');
-      }
-
       updateUI(true);
       return true;
     }
 
-    // 第二軌：Google 試算表同步 (相容 gviz、CSV 與多工作表)
+    // 第二軌：Google 試算表同步 (精確解析 A14~A16、B14~B16、C14~C16)
     async function fetchDirectFromSheet(isManualTest = false, targetSheetParam = null) {
       const diagStatus = document.getElementById('diag-status');
       const tagEl = document.getElementById('sheet-direct-tag');
@@ -1209,6 +1195,39 @@
         if (data && data.table && data.table.rows) {
           const rows = data.table.rows;
 
+          // 1. 精確依據使用者提供的試算表格位對照 (A14=00400A, A15=00406A, A16=00919，B欄為現價，C欄為漲跌)
+          for (let r = 0; r < rows.length; r++) {
+            const cells = rows[r].c;
+            if (!cells) continue;
+            
+            // 檢查第一欄 A 欄是否為目標股票代碼
+            const colA = cleanStr(cells[0]?.v || cells[0]?.f);
+            let targetCode = null;
+            if (colA.includes('00919') || colA === '919') targetCode = '00919';
+            else if (colA.includes('00406a') || colA.includes('406a') || colA.includes('00406')) targetCode = '00406A';
+            else if (colA.includes('00400a') || colA.includes('400a') || colA.includes('00400')) targetCode = '00400A';
+
+            if (targetCode) {
+              const h = appState.holdings.find(item => item.code === targetCode);
+              if (h) {
+                // B 欄: 現價
+                const priceVal = parseNum(cells[1]?.v !== null && cells[1]?.v !== undefined ? cells[1]?.v : cells[1]?.f);
+                // C 欄: 漲跌
+                const changeVal = parseNum(cells[2]?.v !== null && cells[2]?.v !== undefined ? cells[2]?.v : cells[2]?.f);
+
+                if (priceVal !== null && priceVal > 0) {
+                  h.currentPrice = priceVal;
+                  foundItems.push(`${targetCode}現價:${priceVal}`);
+                }
+                if (changeVal !== null) {
+                  h.change = changeVal;
+                  foundItems.push(`${targetCode}漲跌:${changeVal}`);
+                }
+              }
+            }
+          }
+
+          // 2. 全表智慧關鍵字輔助掃描 (交割戶、質借與其他格位)
           const getValNearbyFromRow = (rIdx, cIdx) => {
             if (rows[rIdx] && rows[rIdx].c && rows[rIdx].c[cIdx + 1]) {
               const v = parseNum(rows[rIdx].c[cIdx + 1].v);
@@ -1246,40 +1265,6 @@
                 if (val !== null && val > 100000) {
                   appState.summary.loanYuanta = val;
                   foundItems.push(`質借金額:$${fmt(val)}`);
-                }
-              }
-
-              // 股票代碼與現價配對
-              const stockTargets = [
-                { code: '00919', aliases: ['00919', '919', '群益'] },
-                { code: '00406A', aliases: ['00406a', '406a', '00406', '中信台灣收益', '主動中信'] },
-                { code: '00400A', aliases: ['00400a', '400a', '00400', '國泰動能高息', '主動國泰'] }
-              ];
-
-              for (const tgt of stockTargets) {
-                if (tgt.aliases.some(alias => cleanText === alias || cleanText.startsWith(alias))) {
-                  for (let sc = c + 1; sc < Math.min(c + 12, cells.length); sc++) {
-                    if (!cells[sc]) continue;
-                    const numVal = parseNum(cells[sc].v !== null && cells[sc].v !== undefined ? cells[sc].v : cells[sc].f);
-                    if (numVal !== null) {
-                      // 判定為股數
-                      if (numVal >= 10000 && numVal <= 2000000) {
-                        const h = appState.holdings.find(item => item.code === tgt.code);
-                        if (h) {
-                          h.shares = numVal;
-                          foundItems.push(`${tgt.code}股數:${numVal}`);
-                        }
-                      }
-                      // 判定為現價
-                      if (numVal >= 5 && numVal <= 250) {
-                        const h = appState.holdings.find(item => item.code === tgt.code);
-                        if (h && numVal !== h.currentPrice) {
-                          h.currentPrice = numVal;
-                          foundItems.push(`${tgt.code}現價:$${numVal}`);
-                        }
-                      }
-                    }
-                  }
                 }
               }
             }
