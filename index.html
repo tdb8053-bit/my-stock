@@ -620,7 +620,7 @@
     const DEFAULT_SHEET_ID = '12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs';
     const DEFAULT_GID = '632679711';
 
-    // 核心資料狀態庫：精確對應試算表格位 (00919配息=B6, 00406A=L10:L, 00400A=G9:G)
+    // 核心資料狀態庫：精確對應試算表格位 (存股配息 B5=配息總金額, B6=839,259; 00406A=L10:L, 00400A=G9:G)
     let appState = {
       summary: {
         initialCapital: 5631250,
@@ -631,6 +631,7 @@
         loanYuanta: 1900000,
         cashCathay: 131586,
         realizedPnL: 110985,
+        totalDividendsB6: 839259, // [存股配息] B5=配息總金額, B6=839,259
         baseStockValue: 7215900,
         updateTime: '載入中...',
         quoteSource: '試算表直連與市場引擎'
@@ -648,7 +649,7 @@
           marketValue: 4798500,
           unrealizedPnL: 1807050,
           returnRate: 60.41,
-          totalDividends: 674259 // 存股配息 B6
+          totalDividends: 776239 // 839,259 - 34,200 - 28,820 = 776,239
         },
         {
           code: '00406A',
@@ -845,7 +846,8 @@
       if (h400 && col400El) col400El.innerText = '$' + fmt(h400.totalDividends);
 
       if (totalDivEl) {
-        const grandTotal = (h919?.totalDividends || 0) + (h406?.totalDividends || 0) + (h400?.totalDividends || 0);
+        // 若有明確抓到 B6 配息總金額 839,259，以 B6 為準；否則依持股配息加總
+        const grandTotal = s.totalDividendsB6 || ((h919?.totalDividends || 0) + (h406?.totalDividends || 0) + (h400?.totalDividends || 0));
         totalDivEl.innerText = '$' + fmt(grandTotal);
       }
 
@@ -1279,22 +1281,33 @@
                   h.currentPrice = priceVal;
                   foundItems.push(`${targetCode}現價:${priceVal}`);
                 }
-          // 3. 專屬存股配息格位解析 (僅在「存股配息」分頁或具備配息標籤時才讀取，嚴格加上防呆)
-          const isDividendSheet = targetSheetParam && targetSheetParam.includes('存股配息');
-          
-          // 檢查 B6 (row 5, col 1) 00919 配息 (只有數值在合理配息範圍 10萬~200萬 之間才採納)
-          if (isDividendSheet && rows[5] && rows[5].c && rows[5].c[1]) {
-            const b6Val = parseNum(rows[5].c[1].v !== null ? rows[5].c[1].v : rows[5].c[1].f);
-            if (b6Val !== null && b6Val >= 50000 && b6Val <= 2000000) {
-              const h919 = appState.holdings.find(item => item.code === '00919');
-              if (h919) {
-                h919.totalDividends = b6Val;
-                foundItems.push(`00919配息(B6):$${fmt(b6Val)}`);
+                if (changeVal !== null) {
+                  h.change = changeVal;
+                  foundItems.push(`${targetCode}漲跌:${changeVal}`);
+                }
               }
             }
           }
 
-          // 解析 G9:G 與 L10:L (必須確認是存股配息分頁，且單筆入息小於 10 萬元，絕不誤抓幾百萬的股票市值)
+          // 3. 專屬存股配息格位解析 (僅在「存股配息」分頁或具備配息標籤時才讀取，嚴格加上防呆)
+          const isDividendSheet = targetSheetParam && targetSheetParam.includes('存股配息');
+          
+          // 檢查 [存股配息] B5=配息總金額, B6=839,259 (row 5, col 1: B6)
+          if (isDividendSheet && rows[5] && rows[5].c && rows[5].c[1]) {
+            const b6Val = parseNum(rows[5].c[1].v !== null ? rows[5].c[1].v : rows[5].c[1].f);
+            if (b6Val !== null && b6Val >= 50000 && b6Val <= 2000000) {
+              appState.summary.totalDividendsB6 = b6Val;
+              const h400 = appState.holdings.find(item => item.code === '00400A');
+              const h406 = appState.holdings.find(item => item.code === '00406A');
+              const h919 = appState.holdings.find(item => item.code === '00919');
+              if (h919) {
+                h919.totalDividends = b6Val - (h400?.totalDividends || 34200) - (h406?.totalDividends || 28820);
+              }
+              foundItems.push(`配息總額(B6):$${fmt(b6Val)}`);
+            }
+          }
+
+          // 解析 G9:G 與 L10:L (必須確認是存股配息分頁，且單筆入息小於 15 萬元，絕不誤抓幾百萬的股票市值)
           if (isDividendSheet) {
             let sumG = 0;
             let sumL = 0;
@@ -1669,11 +1682,12 @@
       const urlInput = document.getElementById('direct-sheet-url');
       if (urlInput) urlInput.value = savedUrl;
 
-      // 重設正確的預設配息數據，防止手機舊快取汙染
+      // 重設正確的預設配息數據（存股配息 B5=配息總金額, B6=839,259）
+      appState.summary.totalDividendsB6 = 839259;
       const h919 = appState.holdings.find(h => h.code === '00919');
       const h406 = appState.holdings.find(h => h.code === '00406A');
       const h400 = appState.holdings.find(h => h.code === '00400A');
-      if (h919) h919.totalDividends = 674259;
+      if (h919) h919.totalDividends = 776239;
       if (h406) h406.totalDividends = 28820;
       if (h400) h400.totalDividends = 34200;
 
