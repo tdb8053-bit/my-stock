@@ -143,7 +143,7 @@
 
           <div class="mt-2.5 flex items-baseline justify-between">
             <div id="metric-net-equity" class="text-3xl font-black tracking-tight text-white font-mono">
-              $7,503,723
+              $7,347,486
             </div>
             <span class="text-xs text-gray-400 font-mono">期初 $5,631,250</span>
           </div>
@@ -155,15 +155,15 @@
                 <span>總持股市值</span>
                 <span class="text-[10px] text-indigo-400 font-mono" id="holdings-summary-count">3 檔合計</span>
               </span>
-              <div id="metric-stock-value" class="text-[18px] font-black text-gray-100 font-mono mt-1">$7,278,500</div>
+              <div id="metric-stock-value" class="text-[18px] font-black text-gray-100 font-mono mt-1">$7,215,900</div>
             </div>
             <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
               <span class="text-xs text-gray-400 font-medium flex items-center justify-between">
                 <span>本期損益</span>
-                <span class="text-[10px] text-cyan-400 font-mono">未實現+已領息</span>
+                <span class="text-[10px] text-cyan-400 font-mono">F10 試算表同步</span>
               </span>
               <div id="metric-period-pnl" class="text-[18px] font-black font-mono mt-1 stock-down">
-                -27,527
+                -183,764
               </div>
             </div>
           </div>
@@ -613,17 +613,18 @@
     const DEFAULT_SHEET_ID = '12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs';
     const DEFAULT_GID = '632679711';
 
-    // 核心資料狀態庫：對應試算表最新實盤報價 (A16: 00919 $31.99, A15: 00406A $9.34, A14: 00400A $14.52)
+    // 核心資料狀態庫：精確對應試算表格位 (D4: 即時本金 $7,347,486, F10: 本期損益 -$183,764, A14~A16 股票現價)
     let appState = {
       summary: {
         initialCapital: 5631250,
-        netEquity: 7447486,
+        netEquity: 7347486,     // C4=即時本金, D4=7,347,486
         stockValue: 7215900,
-        periodPnL: -90127,
+        periodPnL: -183764,     // F9=本期損益, F10=-183,764
         dailyPnL: -96500,
         loanYuanta: 1900000,
         cashCathay: 131586,
         realizedPnL: 110985,
+        baseStockValue: 7215900, // 基準市值，供盤中動態跳動聯動使用
         updateTime: '載入中...',
         quoteSource: '試算表直連與市場引擎'
       },
@@ -696,7 +697,7 @@
         { date: '07/30', pnl: -1262970 },
         { date: '07/31', pnl: -802362 },
         { date: '08/03', pnl: -765062 },
-        { date: '今日', pnl: -27527 }
+        { date: '今日', pnl: -183764 }
       ]
     };
 
@@ -748,12 +749,25 @@
         }
       });
 
+      // 盤中動態差額 (相對於試算表基準市值的浮動)
+      const stockDelta = totalStockValue - (appState.summary.baseStockValue || totalStockValue);
+
       appState.summary.stockValue = totalStockValue;
       appState.summary.dailyPnL = totalDailyPnL;
-      // 即時淨本金 = 總市值 + 國泰交割戶 - 質借
-      appState.summary.netEquity = totalStockValue + Number(appState.summary.cashCathay || 0) - Number(appState.summary.loanYuanta || 0);
-      // 本期損益 = 未實現損益 + 已領配息 (或加上已實現)
-      appState.summary.periodPnL = totalUnrealizedPnL + totalDividends;
+      
+      // 若試算表有 D4 (即時本金) 與 F10 (本期損益)，以其為基準疊加即時價格波動
+      if (appState.summary.rawNetEquity) {
+        appState.summary.netEquity = appState.summary.rawNetEquity + stockDelta;
+      } else {
+        // 試算表 D4 即時本金 = 總市值 + 國泰交割戶 (7,215,900 + 131,586 = 7,347,486)
+        appState.summary.netEquity = 7347486 + stockDelta;
+      }
+
+      if (appState.summary.rawPeriodPnL !== undefined && appState.summary.rawPeriodPnL !== null) {
+        appState.summary.periodPnL = appState.summary.rawPeriodPnL + stockDelta;
+      } else {
+        appState.summary.periodPnL = -183764 + stockDelta;
+      }
 
       // 更新最後更新時間
       const now = new Date();
@@ -1195,7 +1209,28 @@
         if (data && data.table && data.table.rows) {
           const rows = data.table.rows;
 
-          // 1. 精確依據使用者提供的試算表格位對照 (A14=00400A, A15=00406A, A16=00919，B欄為現價，C欄為漲跌)
+          // 1. 精確對照特定格位：
+          // - C4=即時本金, D4=7,347,486 (row index 3)
+          // - F9=本期損益, F10=-183,764 (F9: row index 8, F10: row index 9)
+          if (rows[3] && rows[3].c) {
+            const d4Val = parseNum(rows[3].c[3]?.v !== null && rows[3].c[3]?.v !== undefined ? rows[3].c[3]?.v : rows[3].c[3]?.f);
+            if (d4Val !== null && d4Val > 1000000) {
+              appState.summary.rawNetEquity = d4Val;
+              appState.summary.netEquity = d4Val;
+              foundItems.push(`D4(即時本金):$${fmt(d4Val)}`);
+            }
+          }
+
+          if (rows[9] && rows[9].c) {
+            const f10Val = parseNum(rows[9].c[5]?.v !== null && rows[9].c[5]?.v !== undefined ? rows[9].c[5]?.v : rows[9].c[5]?.f);
+            if (f10Val !== null) {
+              appState.summary.rawPeriodPnL = f10Val;
+              appState.summary.periodPnL = f10Val;
+              foundItems.push(`F10(本期損益):${f10Val >= 0 ? '+' : ''}${fmt(f10Val)}`);
+            }
+          }
+
+          // 2. 精確依據使用者提供的試算表格位對照 (A14=00400A, A15=00406A, A16=00919，B欄為現價，C欄為漲跌)
           for (let r = 0; r < rows.length; r++) {
             const cells = rows[r].c;
             if (!cells) continue;
@@ -1227,7 +1262,7 @@
             }
           }
 
-          // 2. 全表智慧關鍵字輔助掃描 (交割戶、質借與其他格位)
+          // 3. 全表智慧關鍵字掃描備援 (即時本金、本期損益、交割戶、質借等)
           const getValNearbyFromRow = (rIdx, cIdx) => {
             if (rows[rIdx] && rows[rIdx].c && rows[rIdx].c[cIdx + 1]) {
               const v = parseNum(rows[rIdx].c[cIdx + 1].v);
@@ -1251,6 +1286,24 @@
               if (!cleanText) continue;
 
               const getValNearby = () => getValNearbyFromRow(r, c);
+
+              if (cleanText.includes('即時本金') && !appState.summary.rawNetEquity) {
+                const val = getValNearby();
+                if (val !== null && val > 1000000) {
+                  appState.summary.rawNetEquity = val;
+                  appState.summary.netEquity = val;
+                  foundItems.push(`即時本金:$${fmt(val)}`);
+                }
+              }
+
+              if (cleanText.includes('本期損益') && appState.summary.rawPeriodPnL === undefined) {
+                const val = getValNearby();
+                if (val !== null) {
+                  appState.summary.rawPeriodPnL = val;
+                  appState.summary.periodPnL = val;
+                  foundItems.push(`本期損益:${val >= 0 ? '+' : ''}${fmt(val)}`);
+                }
+              }
 
               if (cleanText.includes('國泰餘額') || cleanText.includes('交割戶')) {
                 const val = getValNearby();
