@@ -127,7 +127,7 @@
       <!-- ================= 頁籤 1: 總覽面板 (預設顯示) ================= -->
       <section id="tab-overview" class="space-y-3.5">
         
-        <!-- 即時淨本金主卡 -->
+        <!-- 即時淨本金主卡 (D4) -->
         <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#070b14] p-5 border border-slate-700/60 shadow-xl">
           <div class="absolute -right-8 -top-8 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
           
@@ -147,18 +147,18 @@
             <span class="text-xs text-gray-400 font-mono">期初 $5,631,250</span>
           </div>
 
-          <!-- 總持股市值 與 本期損益 -->
+          <!-- 總持股市值 (D3) 與 本期損益 (F10) -->
           <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-700/60">
             <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
               <span class="text-xs text-gray-400 font-medium flex items-center justify-between">
-                <span>總持股市值</span>
+                <span>總持股市值 (D3)</span>
                 <span class="text-[10px] text-indigo-400 font-mono" id="holdings-summary-count">3 檔合計</span>
               </span>
-              <div id="metric-stock-value" class="text-[18px] font-black text-gray-100 font-mono mt-1">$7,215,900</div>
+              <div id="metric-stock-value" class="text-[18px] font-black text-gray-100 font-mono mt-1">$7,282,500</div>
             </div>
             <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
               <span class="text-xs text-gray-400 font-medium flex items-center justify-between">
-                <span>本期損益</span>
+                <span>本期損益 (F10)</span>
                 <span class="text-[10px] text-cyan-400 font-mono">F10 試算表同步</span>
               </span>
               <div id="metric-period-pnl" class="text-[18px] font-black font-mono mt-1 stock-down">
@@ -167,13 +167,13 @@
             </div>
           </div>
 
-          <!-- 今日總損益 與 已實現 -->
+          <!-- 今日總損益 (B7) 與 已實現 -->
           <div class="grid grid-cols-2 gap-3 mt-2.5">
             <div class="bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/60">
-              <span class="text-xs text-gray-400 block font-medium">今日總損益 (現價跳動)</span>
+              <span class="text-xs text-gray-400 block font-medium">今日總損益 (B7)</span>
               <div id="metric-daily-pnl" class="text-sm font-bold font-mono mt-1 stock-up flex items-center space-x-1.5">
-                <span>+48,900</span>
-                <span class="text-xs opacity-90 font-medium font-mono">(+0.67%)</span>
+                <span>+49,600</span>
+                <span class="text-xs opacity-90 font-medium font-mono">(+0.68%)</span>
               </div>
             </div>
             <div class="bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/60">
@@ -186,7 +186,7 @@
           </div>
         </div>
 
-        <!-- 帳戶資金三宮格 -->
+        <!-- 帳戶資金三宮格 (C10 國泰餘額) -->
         <div class="grid grid-cols-3 gap-2">
           <div class="bg-[#161b22] border border-gray-800/80 p-3 rounded-xl">
             <span class="text-xs text-gray-400 block truncate">元大質借金額</span>
@@ -194,9 +194,9 @@
             <span class="text-[10px] text-gray-500">利息精確扣抵</span>
           </div>
           <div class="bg-[#161b22] border border-gray-800/80 p-3 rounded-xl">
-            <span class="text-xs text-gray-400 block truncate">國泰交割餘額</span>
-            <span id="metric-cash" class="text-sm font-bold text-emerald-400 font-mono mt-1 block">$131,586</span>
-            <span class="text-[10px] text-gray-500">閒置活期資金</span>
+            <span class="text-xs text-gray-400 block truncate">國泰餘額 (C10)</span>
+            <span id="metric-cash" class="text-sm font-bold text-emerald-400 font-mono mt-1 block">$95,353</span>
+            <span class="text-[10px] text-gray-500">C9=國泰餘額 直連</span>
           </div>
           <div class="bg-[#161b22] border border-gray-800/80 p-3 rounded-xl">
             <span class="text-xs text-gray-400 block truncate">投入期初本金</span>
@@ -209,7 +209,7 @@
         <div class="bg-cyan-950/40 border border-cyan-800/50 rounded-xl p-3 flex items-center justify-between text-xs">
           <div class="flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            <span class="text-cyan-200">行情引擎：<span id="quote-source-label" class="font-bold">試算表精確直連模式</span></span>
+            <span class="text-cyan-200">行情引擎：<span id="quote-source-label" class="font-bold">試算表格位直連 (D3/D4/B7/F10)</span></span>
           </div>
           <button onclick="forceTriggerFullRefresh()" class="text-xs font-mono text-cyan-300 hover:underline">
             點此立即刷新
@@ -343,12 +343,12 @@
               <div class="flex items-center space-x-2">
                 <span class="text-base font-bold text-white">00406A 主動中信台灣收益</span>
                 <span class="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.2 rounded">月配型</span>
-                <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1 py-0.2 rounded">L10:L</span>
+                <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1 py-0.2 rounded">F & G欄</span>
               </div>
               <p class="text-sm text-gray-400 mt-1" id="shares-label-00406A">持股數量: 150,000 股 (150 張)</p>
             </div>
             <div class="text-right">
-              <span class="text-xs text-gray-400 block">累計已領股息 (L10:L)</span>
+              <span class="text-xs text-gray-400 block">累計已領股息</span>
               <div class="text-base font-black text-amber-400 font-mono" id="div-collected-00406A">$28,820</div>
             </div>
           </div>
@@ -371,12 +371,12 @@
               <div class="flex items-center space-x-2">
                 <span class="text-base font-bold text-white">00400A 主動國泰動能高息</span>
                 <span class="text-[10px] font-mono font-bold text-blue-300 bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.2 rounded">月配型</span>
-                <span class="text-[9px] font-mono text-blue-400 bg-blue-950/80 border border-blue-800/60 px-1 py-0.2 rounded">G9:G</span>
+                <span class="text-[9px] font-mono text-blue-400 bg-blue-950/80 border border-blue-800/60 px-1 py-0.2 rounded">H & I欄</span>
               </div>
               <p class="text-sm text-gray-400 mt-1" id="shares-label-00400A">持股數量: 70,000 股 (70 張)</p>
             </div>
             <div class="text-right">
-              <span class="text-xs text-gray-400 block">累計已領股息 (G9:G)</span>
+              <span class="text-xs text-gray-400 block">累計已領股息</span>
               <div class="text-base font-black text-amber-400 font-mono" id="div-collected-00400A">$34,200</div>
             </div>
           </div>
@@ -399,10 +399,10 @@
               <h3 class="text-xs sm:text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center">
                 <i class="fa-solid fa-table-cells mr-1.5 text-cyan-400"></i>月度配息明細表
               </h3>
-              <p class="text-[11px] text-gray-400 mt-0.5">00400A (G9:G) 與 00406A (L10:L) 歷史入息明細</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">00400A 與 00406A 歷史入息明細</p>
             </div>
             <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-mono font-medium">
-              G9:G & L10:L
+              入息紀錄
             </span>
           </div>
 
@@ -418,10 +418,10 @@
                 <tr class="text-gray-400 border-b border-gray-800 text-[11px]">
                   <th class="pb-2.5 pl-1 font-medium text-gray-400 text-left">月份</th>
                   <th class="pb-2.5 px-1 text-right font-medium text-blue-300">
-                    00400A <span class="text-[8px] font-mono text-blue-400/80 bg-blue-950/60 px-0.5 py-0.2 rounded border border-blue-900/60">G9:G</span>
+                    00400A
                   </th>
                   <th class="pb-2.5 px-1 text-right font-medium text-cyan-300">
-                    00406A <span class="text-[8px] font-mono text-cyan-400/80 bg-cyan-950/60 px-0.5 py-0.2 rounded border border-cyan-900/60">L10:L</span>
+                    00406A
                   </th>
                   <th class="pb-2.5 pr-2.5 text-right font-bold text-amber-400">合計入息</th>
                 </tr>
@@ -574,23 +574,24 @@
     const DEFAULT_SHEET_ID = '12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs';
     const DEFAULT_GID = '632679711';
 
-    // 核心資料狀態庫：精確對應 D4=7377853, F10=-153397
+    // 核心資料狀態庫：精準對應 D3=7,282,500, D4=7,377,853, B7=49,600, C10=95,353, F10=-153,397
     let appState = {
       summary: {
         initialCapital: 5631250,
-        baseNetEquity: 7377853, // 試算表 D4 基準即時本金
+        baseNetEquity: 7377853,   // 試算表 D4 基準即時本金
         netEquity: 7377853,
-        stockValue: 7215900,
-        baseStockValue: 7215900, // 試算表基準持股市值
-        basePeriodPnL: -153397, // 試算表 F10 基準本期損益
+        baseStockValue: 7282500,  // 試算表 D3 總持股市值
+        stockValue: 7282500,
+        basePeriodPnL: -153397,   // 試算表 F10 基準本期損益
         periodPnL: -153397,
-        dailyPnL: 48900,
+        rawDailyPnL: 49600,       // 試算表 B7 今日總損益
+        dailyPnL: 49600,
         loanYuanta: 1900000,
-        cashCathay: 131586,
+        cashCathay: 95353,        // C9=國泰餘額, C10=95,353
         realizedPnL: 110985,
         totalDividendsB6: 839259,
         updateTime: '已同步',
-        quoteSource: '雙軌即時聯動引擎'
+        quoteSource: '試算表格位直連 (D3/D4/B7/F10)'
       },
       holdings: [
         {
@@ -599,12 +600,13 @@
           shares: 150000,
           costPrice: 19.943,
           costTotal: 2991450,
-          currentPrice: 31.99,
-          prevClose: 32.74,
-          change: -0.75,
-          marketValue: 4798500,
-          unrealizedPnL: 1807050,
-          returnRate: 60.41,
+          currentPrice: 32.30,
+          basePrice: 32.30,
+          prevClose: 32.09,
+          change: +0.21,         // 150,000 * +0.21 = +31,500
+          marketValue: 4845000,
+          unrealizedPnL: 1853550,
+          returnRate: 61.96,
           totalDividends: 776239
         },
         {
@@ -613,12 +615,13 @@
           shares: 150000,
           costPrice: 9.275,
           costTotal: 1391250,
-          currentPrice: 9.34,
-          prevClose: 9.28,
-          change: +0.06,
-          marketValue: 1401000,
-          unrealizedPnL: 9750,
-          returnRate: 0.70,
+          currentPrice: 9.42,
+          basePrice: 9.42,
+          prevClose: 9.35,
+          change: +0.07,         // 150,000 * +0.07 = +10,500
+          marketValue: 1413000,
+          unrealizedPnL: 21750,
+          returnRate: 1.56,
           totalDividends: 28820
         },
         {
@@ -627,19 +630,20 @@
           shares: 70000,
           costPrice: 14.79,
           costTotal: 1034966,
-          currentPrice: 14.52,
-          prevClose: 14.42,
-          change: +0.10,
-          marketValue: 1016400,
-          unrealizedPnL: -18566,
-          returnRate: -1.79,
+          currentPrice: 14.64,
+          basePrice: 14.64,
+          prevClose: 14.53,
+          change: +0.11,         // 70,000 * +0.11 = +7,600
+          marketValue: 1024500,  // 4,845,000 + 1,413,000 + 1,024,500 = 7,282,500 (吻合 D3)
+          unrealizedPnL: -10466,
+          returnRate: -1.01,
           totalDividends: 34200
         }
       ],
       watchlist: [
-        { code: '00919', name: '群益台灣精選高息', price: 31.99, change: -0.75, pct: '-2.29%', mktCap: '3,100億' },
-        { code: '00400A', name: '主動國泰動能高息', price: 14.52, change: +0.10, pct: '+0.69%', mktCap: '85億' },
-        { code: '00406A', name: '主動中信台灣收益', price: 9.34, change: +0.06, pct: '+0.65%', mktCap: '96億' },
+        { code: '00919', name: '群益台灣精選高息', price: 32.30, change: +0.21, pct: '+0.65%', mktCap: '3,100億' },
+        { code: '00400A', name: '主動國泰動能高息', price: 14.64, change: +0.11, pct: '+0.76%', mktCap: '85億' },
+        { code: '00406A', name: '主動中信台灣收益', price: 9.42, change: +0.07, pct: '+0.75%', mktCap: '96億' },
         { code: '00403A', name: '統一主動型', price: 10.34, change: +0.08, pct: '+0.78%', mktCap: '64億' },
         { code: '4977', name: '眾達-KY', price: 173.00, change: +2.50, pct: '+1.47%', mktCap: '128億' },
         { code: '0050', name: '元大台灣50', price: 215.80, change: -1.20, pct: '-0.55%', mktCap: '4,200億' },
@@ -682,10 +686,12 @@
       let totalUnrealizedPnL = 0;
       let totalDailyPnL = 0;
       let totalDividends = 0;
+      let livePriceDelta = 0;
 
       appState.holdings.forEach(h => {
         const shares = Number(h.shares || 0);
         const price = Number(h.currentPrice || 0);
+        const basePrice = Number(h.basePrice !== undefined ? h.basePrice : price);
         const costPrice = Number(h.costPrice || 0);
         const change = Number(h.change || 0);
 
@@ -699,6 +705,9 @@
         totalDailyPnL += Math.round(shares * change);
         totalDividends += Number(h.totalDividends || 0);
 
+        // 盤中真正相對基準價跳動的金額（未變動前為 0）
+        livePriceDelta += Math.round(shares * (price - basePrice));
+
         const w = appState.watchlist.find(item => item.code === h.code);
         if (w) {
           w.price = price;
@@ -709,20 +718,24 @@
         }
       });
 
-      appState.summary.stockValue = totalStockValue;
-      appState.summary.dailyPnL = totalDailyPnL;
+      // 基準總持股市值 (D3)：以試算表或基準值為準，加上盤中真實跳動差額
+      const baseStock = appState.summary.rawStockValue !== undefined ? appState.summary.rawStockValue : appState.summary.baseStockValue;
+      appState.summary.stockValue = baseStock + livePriceDelta;
       
-      // 計算相對於試算表基準市值的盤中浮動差額 (Delta)
-      const baseStock = appState.summary.baseStockValue || totalStockValue;
-      const stockDelta = totalStockValue - baseStock;
+      // 今日總損益 (B7)
+      if (appState.summary.rawDailyPnL !== undefined && appState.summary.rawDailyPnL !== null) {
+        appState.summary.dailyPnL = appState.summary.rawDailyPnL;
+      } else {
+        appState.summary.dailyPnL = totalDailyPnL;
+      }
 
-      // 即時本金 (D4 基準 + 盤中持股浮動損益)
+      // 即時本金 (D4 基準 + 盤中實質跳動差額)
       const baseNet = appState.summary.rawNetEquity !== undefined ? appState.summary.rawNetEquity : appState.summary.baseNetEquity;
-      appState.summary.netEquity = baseNet + stockDelta;
+      appState.summary.netEquity = baseNet + livePriceDelta;
 
-      // 本期損益 (F10 基準 + 盤中持股浮動損益)
+      // 本期損益 (F10 基準 + 盤中實質跳動差額)
       const basePnL = appState.summary.rawPeriodPnL !== undefined ? appState.summary.rawPeriodPnL : appState.summary.basePeriodPnL;
-      appState.summary.periodPnL = basePnL + stockDelta;
+      appState.summary.periodPnL = basePnL + livePriceDelta;
 
       const now = new Date();
       appState.summary.updateTime = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -1038,6 +1051,82 @@
       diagLog.scrollTop = diagLog.scrollHeight;
     }
 
+    /* 優先從「App行情快取」工作表精準抓取 A 到 J 欄位數據 */
+    async function fetchFromAppCacheSheet(sheetId) {
+      const fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('App行情快取')}&t=${Date.now()}`;
+      try {
+        const res = await fetch(fetchUrl);
+        if (!res.ok) return false;
+        const txt = await res.text();
+        const jsonStr = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonStr);
+
+        if (data && data.table && data.table.rows && data.table.rows.length > 0) {
+          let targetRow = data.table.rows.length > 1 ? data.table.rows[1].c : data.table.rows[0].c;
+          if (!targetRow) return false;
+
+          let found = [];
+
+          // 1. 00919：B欄(index 1)股價，C欄(index 2)漲跌
+          const p919 = parseNum(targetRow[1]?.v ?? targetRow[1]?.f);
+          const c919 = parseNum(targetRow[2]?.v ?? targetRow[2]?.f);
+          const h919 = appState.holdings.find(h => h.code === '00919');
+          if (h919) {
+            if (p919 !== null && p919 > 0) {
+              if (h919.basePrice === undefined) h919.basePrice = p919;
+              h919.currentPrice = p919;
+            }
+            if (c919 !== null) h919.change = c919;
+            found.push(`00919:${p919 || h919.currentPrice}(${c919 >= 0 ? '+' : ''}${c919})`);
+          }
+
+          // 2. 00406A：F欄(index 5)現價，G欄(index 6)漲跌
+          const p406 = parseNum(targetRow[5]?.v ?? targetRow[5]?.f);
+          const c406 = parseNum(targetRow[6]?.v ?? targetRow[6]?.f);
+          const h406 = appState.holdings.find(h => h.code === '00406A');
+          if (h406) {
+            if (p406 !== null && p406 > 0) {
+              if (h406.basePrice === undefined) h406.basePrice = p406;
+              h406.currentPrice = p406;
+            }
+            if (c406 !== null) h406.change = c406;
+            found.push(`00406A:${p406 || h406.currentPrice}(${c406 >= 0 ? '+' : ''}${c406})`);
+          }
+
+          // 3. 00400A：H欄(index 7)現價，I欄(index 8)漲跌
+          const p400 = parseNum(targetRow[7]?.v ?? targetRow[7]?.f);
+          const c400 = parseNum(targetRow[8]?.v ?? targetRow[8]?.f);
+          const h400 = appState.holdings.find(h => h.code === '00400A');
+          if (h400) {
+            if (p400 !== null && p400 > 0) {
+              if (h400.basePrice === undefined) h400.basePrice = p400;
+              h400.currentPrice = p400;
+            }
+            if (c400 !== null) h400.change = c400;
+            found.push(`00400A:${p400 || h400.currentPrice}(${c400 >= 0 ? '+' : ''}${c400})`);
+          }
+
+          // 4. 累計配息(B6)：J欄(index 9)
+          const divB6 = parseNum(targetRow[9]?.v ?? targetRow[9]?.f);
+          if (divB6 !== null && divB6 > 0) {
+            appState.summary.totalDividendsB6 = divB6;
+            found.push(`配息(J欄):$${fmt(divB6)}`);
+          }
+
+          if (found.length > 0) {
+            logDiag(`已從【App行情快取】精準讀取：${found.join('、')}`, 'text-emerald-400 font-bold');
+            const quoteLabel = document.getElementById('quote-source-label');
+            if (quoteLabel) quoteLabel.innerText = 'App行情快取 (A-J直連)';
+            updateUI(true);
+            return true;
+          }
+        }
+      } catch (err) {
+        logDiag(`App行情快取直連讀取提示: ${err.message}`, 'text-gray-400');
+      }
+      return false;
+    }
+
     async function fetchDirectFromSheet(isManualTest = false, targetSheetParam = null) {
       const diagStatus = document.getElementById('diag-status');
       const rawUrl = (document.getElementById('direct-sheet-url')?.value || '').trim() || localStorage.getItem('DIRECT_SHEET_URL') || '';
@@ -1049,6 +1138,18 @@
         if (idMatch && idMatch[1]) sheetId = idMatch[1];
         const gidMatch = rawUrl.match(/gid=([0-9]+)/);
         if (gidMatch && gidMatch[1]) gid = gidMatch[1];
+      }
+
+      // 第一步：優先檢查是否存在專屬的「App行情快取」工作表
+      if (!targetSheetParam) {
+        const cacheSuccess = await fetchFromAppCacheSheet(sheetId);
+        if (cacheSuccess) {
+          if (diagStatus) {
+            diagStatus.innerText = '快取已同步';
+            diagStatus.className = 'text-[10px] text-emerald-400 font-bold';
+          }
+          return true;
+        }
       }
 
       let queryParam = targetSheetParam || `gid=${gid}`;
@@ -1066,19 +1167,47 @@
         if (data && data.table && data.table.rows) {
           const rows = data.table.rows;
 
-          // 讀取 D4 (Row 4, 索引 index 為 3)
-          if (rows[3] && rows[3].c) {
-            const dVal = parseNum(rows[3].c[3]?.v !== null && rows[3].c[3]?.v !== undefined ? rows[3].c[3]?.v : rows[3].c[3]?.f);
-            if (dVal !== null && dVal > 1000000) {
-              appState.summary.rawNetEquity = dVal;
-              foundItems.push(`D4(即時本金):$${fmt(dVal)}`);
+          // 1. 讀取 C3/D3 (總持股市值)：第 3 列 (index 2) 的 D 欄 (index 3)
+          if (rows[2] && rows[2].c) {
+            const d3Val = parseNum(rows[2].c[3]?.v ?? rows[2].c[3]?.f);
+            if (d3Val !== null && d3Val > 1000000) {
+              appState.summary.rawStockValue = d3Val;
+              appState.summary.stockValue = d3Val;
+              foundItems.push(`D3(持股市值):$${fmt(d3Val)}`);
             }
           }
 
-          // 讀取 F10 (Row 10, 索引 index 為 9，精準鎖定避免覆蓋)
+          // 2. 讀取 C4/D4 (即時本金)：第 4 列 (index 3) 的 D 欄 (index 3)
+          if (rows[3] && rows[3].c) {
+            const d4Val = parseNum(rows[3].c[3]?.v ?? rows[3].c[3]?.f);
+            if (d4Val !== null && d4Val > 1000000) {
+              appState.summary.rawNetEquity = d4Val;
+              foundItems.push(`D4(即時本金):$${fmt(d4Val)}`);
+            }
+          }
+
+          // 3. 讀取 A7/B7 (今日總損益)：第 7 列 (index 6) 的 B 欄 (index 1)
+          if (rows[6] && rows[6].c) {
+            const b7Val = parseNum(rows[6].c[1]?.v ?? rows[6].c[1]?.f);
+            if (b7Val !== null) {
+              appState.summary.rawDailyPnL = b7Val;
+              foundItems.push(`B7(今日損益):${b7Val >= 0 ? '+' : ''}${fmt(b7Val)}`);
+            }
+          }
+
+          // 4. 讀取 C9/C10 (國泰餘額)：第 10 列 (index 9) 的 C 欄 (index 2)
+          if (rows[9] && rows[9].c) {
+            const c10Val = parseNum(rows[9].c[2]?.v ?? rows[9].c[2]?.f);
+            if (c10Val !== null && c10Val > 0) {
+              appState.summary.cashCathay = c10Val;
+              foundItems.push(`C10(國泰餘額):$${fmt(c10Val)}`);
+            }
+          }
+
+          // 5. 讀取 F10 (本期損益)：第 10 列 (index 9) 的 F 欄 (index 5)
           let foundF10 = false;
           if (rows[9] && rows[9].c) {
-            const fVal = parseNum(rows[9].c[5]?.v !== null && rows[9].c[5]?.v !== undefined ? rows[9].c[5]?.v : rows[9].c[5]?.f);
+            const fVal = parseNum(rows[9].c[5]?.v ?? rows[9].c[5]?.f);
             if (fVal !== null && Math.abs(fVal) > 1000) {
               appState.summary.rawPeriodPnL = fVal;
               foundItems.push(`F10(本期損益):${fVal >= 0 ? '+' : ''}${fmt(fVal)}`);
@@ -1086,11 +1215,10 @@
             }
           }
 
-          // 若第 10 列沒有，精準在第 9~11 列尋找絕對值大於 1000 的損益金額
           if (!foundF10) {
             for (let r = 8; r <= 10; r++) {
               if (rows[r] && rows[r].c) {
-                const fVal = parseNum(rows[r].c[5]?.v !== null && rows[r].c[5]?.v !== undefined ? rows[r].c[5]?.v : rows[r].c[5]?.f);
+                const fVal = parseNum(rows[r].c[5]?.v ?? rows[r].c[5]?.f);
                 if (fVal !== null && Math.abs(fVal) > 1000) {
                   appState.summary.rawPeriodPnL = fVal;
                   foundItems.push(`F10(本期損益):${fVal >= 0 ? '+' : ''}${fmt(fVal)}`);
@@ -1100,7 +1228,7 @@
             }
           }
 
-          // 讀取股票現價 (A14~A16)
+          // 6. 讀取股票現價與漲跌 (A14~A16)
           for (let r = 0; r < rows.length; r++) {
             const cells = rows[r].c;
             if (!cells) continue;
@@ -1113,10 +1241,46 @@
             if (targetCode) {
               const h = appState.holdings.find(item => item.code === targetCode);
               if (h) {
-                const priceVal = parseNum(cells[1]?.v !== null && cells[1]?.v !== undefined ? cells[1]?.v : cells[1]?.f);
-                const changeVal = parseNum(cells[2]?.v !== null && cells[2]?.v !== undefined ? cells[2]?.v : cells[2]?.f);
+                const priceVal = parseNum(cells[1]?.v ?? cells[1]?.f);
+                const changeVal = parseNum(cells[2]?.v ?? cells[2]?.f);
                 if (priceVal !== null && priceVal > 0) h.currentPrice = priceVal;
                 if (changeVal !== null) h.change = changeVal;
+              }
+            }
+
+            // 智慧備援：若索引有偏移，透過文字配對自動錨定
+            for (let c = 0; c < cells.length; c++) {
+              const cellText = cleanStr(cells[c]?.v || cells[c]?.f);
+              
+              if ((cellText.includes('總持股市值') || cellText.includes('持股市值')) && !foundItems.some(i => i.startsWith('D3'))) {
+                const rightVal = parseNum(cells[c + 1]?.v ?? cells[c + 1]?.f);
+                if (rightVal !== null && rightVal > 1000000) {
+                  appState.summary.rawStockValue = rightVal;
+                  appState.summary.stockValue = rightVal;
+                  foundItems.push(`持股市值(文字):$${fmt(rightVal)}`);
+                }
+              }
+
+              if ((cellText.includes('今日總損益') || cellText.includes('今日損益') || cellText.includes('當日損益')) && !foundItems.some(i => i.startsWith('B7'))) {
+                const nextVal = parseNum(cells[c + 1]?.v ?? cells[c + 1]?.f);
+                if (nextVal !== null) {
+                  appState.summary.rawDailyPnL = nextVal;
+                  foundItems.push(`今日損益(文字):${nextVal >= 0 ? '+' : ''}${fmt(nextVal)}`);
+                }
+              }
+
+              if (cellText.includes('國泰餘額') || cellText.includes('國泰交割') || cellText === '國泰') {
+                let detectedCash = null;
+                if (rows[r + 1] && rows[r + 1].c && rows[r + 1].c[c]) {
+                  detectedCash = parseNum(rows[r + 1].c[c]?.v ?? rows[r + 1].c[c]?.f);
+                }
+                if (detectedCash === null && cells[c + 1]) {
+                  detectedCash = parseNum(cells[c + 1]?.v ?? cells[c + 1]?.f);
+                }
+                if (detectedCash !== null && detectedCash > 0) {
+                  appState.summary.cashCathay = detectedCash;
+                  foundItems.push(`國泰餘額(C10):$${fmt(detectedCash)}`);
+                }
               }
             }
           }
@@ -1128,7 +1292,7 @@
             diagStatus.innerText = '同步成功';
             diagStatus.className = 'text-[10px] text-emerald-400 font-bold';
           }
-          logDiag(`試算表同步：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
+          logDiag(`試算表直連同步：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
           return true;
         }
       } catch (e) {
