@@ -129,7 +129,7 @@
               $7,377,853
             </div>
             <div class="mt-1.5 inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-800/80 border border-slate-700/70 text-[11px] text-gray-300 font-mono" id="metric-initial-cap">
-              期初投入 $5,631,250
+              期初投入 <span class="font-bold text-white ml-1">$5,631,250</span>
             </div>
           </div>
 
@@ -172,41 +172,22 @@
           </div>
         </div>
 
-        <!-- 帳戶資金三宮格 (質借、國泰交割、期初本金) -->
+        <!-- 帳戶資金三宮格 (質借、國泰交割、期初本金) - 乾淨單組且文字置中 -->
         <div class="grid grid-cols-3 gap-2">
-          <div class="bg-[#161b22] border border-gray-800/80 p-2.5 sm:p-3 rounded-xl">
-            <span class="text-[11px] text-gray-400 block truncate">元大質借金額</span>
-            <span id="metric-loan" class="text-xs sm:text-sm font-bold text-amber-400 font-mono mt-1 block truncate">$1,900,000</span>
-            <span class="text-[9px] text-gray-500 block truncate">利息精算扣抵</span>
+          <div class="bg-[#161b22] border border-gray-800/80 p-2.5 sm:p-3 rounded-xl flex flex-col items-center text-center">
+            <span class="text-[11px] text-gray-400 block truncate max-w-full">元大質借金額</span>
+            <span id="metric-loan" class="text-xs sm:text-sm font-bold text-amber-400 font-mono mt-1 block truncate max-w-full">$1,900,000</span>
+            <span class="text-[9px] text-gray-500 block truncate max-w-full">利息精算扣抵</span>
           </div>
-          <div class="bg-[#161b22] border border-gray-800/80 p-2.5 sm:p-3 rounded-xl">
-            <span class="text-[11px] text-gray-400 block truncate">國泰餘額 (C10)</span>
-            <span id="metric-cash" class="text-xs sm:text-sm font-bold text-emerald-400 font-mono mt-1 block truncate">$95,353</span>
-            <span class="text-[9px] text-gray-500 block truncate">交割戶直連</span>
+          <div class="bg-[#161b22] border border-gray-800/80 p-2.5 sm:p-3 rounded-xl flex flex-col items-center text-center">
+            <span class="text-[11px] text-gray-400 block truncate max-w-full">國泰餘額 (C10)</span>
+            <span id="metric-cash" class="text-xs sm:text-sm font-bold text-emerald-400 font-mono mt-1 block truncate max-w-full">$95,353</span>
+            <span class="text-[9px] text-gray-500 block truncate max-w-full">交割戶直連</span>
           </div>
-          <div class="bg-[#161b22] border border-gray-800/80 p-2.5 sm:p-3 rounded-xl">
-            <span class="text-[11px] text-gray-400 block truncate">期初投入本金</span>
-            <span id="metric-initial-box" class="text-xs sm:text-sm font-bold text-slate-300 font-mono mt-1 block truncate">$5,631,250</span>
-            <span id="metric-total-return-pct" class="text-[9px] text-cyan-400 block truncate">總回報 +31.0%</span>
-          </div>
-        </div>
-
-        <!-- 帳戶資金三宮格 (質借、國泰交割、期初本金) -->
-        <div class="grid grid-cols-3 gap-2">
-          <div class="bg-[#161b22] border border-gray-800/80 p-3 rounded-xl">
-            <span class="text-[11px] text-gray-400 block truncate">元大質借金額</span>
-            <span id="metric-loan" class="text-sm font-bold text-amber-400 font-mono mt-1 block">$1,900,000</span>
-            <span class="text-[9px] text-gray-500">利息精算扣抵</span>
-          </div>
-          <div class="bg-[#161b22] border border-gray-800/80 p-3 rounded-xl">
-            <span class="text-[11px] text-gray-400 block truncate">國泰餘額 (C10)</span>
-            <span id="metric-cash" class="text-sm font-bold text-emerald-400 font-mono mt-1 block">$95,353</span>
-            <span class="text-[9px] text-gray-500">交割戶直連</span>
-          </div>
-          <div class="bg-[#161b22] border border-gray-800/80 p-3 rounded-xl">
-            <span class="text-[11px] text-gray-400 block truncate">期初投入本金</span>
-            <span id="metric-initial-box" class="text-sm font-bold text-slate-300 font-mono mt-1 block">$5,631,250</span>
-            <span id="metric-total-return-pct" class="text-[9px] text-cyan-400">總回報 +31.0%</span>
+          <div class="bg-[#161b22] border border-gray-800/80 p-2.5 sm:p-3 rounded-xl flex flex-col items-center text-center">
+            <span class="text-[11px] text-gray-400 block truncate max-w-full">期初投入本金</span>
+            <span id="metric-initial-box" class="text-xs sm:text-sm font-bold text-slate-300 font-mono mt-1 block truncate max-w-full">$5,631,250</span>
+            <span id="metric-total-return-pct" class="text-[9px] text-cyan-400 block truncate max-w-full">總回報 +31.0%</span>
           </div>
         </div>
 
@@ -683,7 +664,7 @@
         if (flashEffect) applyFlash(stockValEl, s.dailyPnL >= 0);
       }
 
-      if (initCapEl) initCapEl.innerText = `期初投入 $${fmt(s.initialCapital)}`;
+      if (initCapEl) initCapEl.innerHTML = `期初投入 <span class="font-bold text-white ml-1">$${fmt(s.initialCapital)}</span>`;
       if (initBoxEl) initBoxEl.innerText = `$${fmt(s.initialCapital)}`;
 
       if (periodEl) {
