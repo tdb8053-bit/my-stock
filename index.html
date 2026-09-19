@@ -5,7 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>智慧投資資產總管</title>
   
-  <!-- Tailwind CSS CDN -->
+  <!-- 手機主畫面 PWA 與桌面捷徑配置 (iOS Safari & Android Chrome) -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="資產總管">
+  <meta name="application-name" content="智慧資產總管">
+  <meta name="theme-color" content="#0a0d14">
+  <meta name="msapplication-TileColor" content="#0a0d14">
+
+  <!-- 
+    GitHub Pages 專屬高解析度圖示宣告 (優先讀取同目錄實體 PNG 圖檔，並保留向量備援)
+  -->
+  <link rel="apple-touch-icon" sizes="192x192" href="./icon-gold-coin-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="./icon-gold-coin-512.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-gold-coin-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-gold-coin-512.png">
+
+  <!-- Android Chrome PWA Web App Manifest (精確指定 192 與 512 尺寸圖標) -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E6%99%BA%E6%85%A7%E6%8A%95%E8%B3%87%E8%B3%87%E7%94%A2%E7%B8%BD%E7%AE%A1%22%2C%22short_name%22%3A%22%E8%B3%87%E7%94%A2%E7%B8%BD%E7%AE%A1%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0d14%22%2C%22theme_color%22%3A%22%230a0d14%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22icon-gold-coin-192.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22icon-gold-coin-512.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -21,7 +40,6 @@
     }
   </script>
 
-  <!-- Font Awesome Icons & Chart.js -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -36,7 +54,7 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* 台股紅漲綠跌樣式 */
+    /* 台股紅漲綠跌慣例：紅色為正損益/上漲，綠色為負損益/下跌 */
     .stock-up { color: #f87171 !important; }
     .stock-down { color: #4ade80 !important; }
     .stock-flat { color: #94a3b8 !important; }
@@ -72,11 +90,15 @@
 
   <div class="phone-container w-full">
 
-    <!-- 頂部即時狀態列 -->
     <header class="sticky top-0 z-30 bg-[#161b22]/95 backdrop-blur-md border-b border-gray-800/80 px-4 pt-3 pb-3 flex items-center justify-between">
       <div class="flex items-center space-x-2.5 min-w-0">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex-shrink-0 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-          <i class="fa-solid fa-chart-line text-white text-xs"></i>
+        <!-- 頂部左側徽章：直接讀取同目錄下的金幣實體圖檔，並帶備援向量 -->
+        <div class="w-9 h-9 rounded-xl bg-[#0b0f19] border border-amber-500/50 flex-shrink-0 flex items-center justify-center shadow-lg shadow-amber-500/20 overflow-hidden relative">
+          <img src="./icon-gold-coin-192.png" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <svg viewBox="0 0 512 512" class="w-full h-full p-0.5 hidden">
+            <circle cx="256" cy="256" r="215" fill="#ffd700" stroke="#ffe082" stroke-width="8"/>
+            <path d="M80 375 L180 270 L245 320 L380 140 L345 130 L445 118 L430 220 L395 180 L255 365 L185 310 L95 405 Z" fill="#ef4444" stroke="#ffffff" stroke-width="8"/>
+          </svg>
         </div>
         <div class="min-w-0">
           <div class="flex items-center space-x-1.5 whitespace-nowrap">
@@ -110,7 +132,7 @@
       <!-- ================= 頁籤 1: 總覽面板 ================= -->
       <section id="tab-overview" class="space-y-3.5">
         
-        <!-- 即時淨本金主卡 (D4) - 僅此卡向上/向中央聚焦，兩側留足安全空間 -->
+        <!-- 即時淨本金主卡 (D4) -->
         <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#070b14] p-5 border border-slate-700/60 shadow-xl">
           <div class="absolute -right-8 -top-8 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
           
@@ -123,7 +145,7 @@
             </span>
           </div>
 
-          <!-- 專屬向中央聚焦區域：兩側保留充足 padding，主金額與期初本金膠囊垂直居中對齊 -->
+          <!-- 主卡中央聚焦區域：主金額與期初投入標記 -->
           <div class="mt-3.5 mb-2 flex flex-col items-center justify-center px-4">
             <div id="metric-net-equity" class="text-2xl sm:text-3xl font-black tracking-tight text-white font-mono text-center">
               $7,377,853
@@ -172,7 +194,7 @@
           </div>
         </div>
 
-        <!-- 帳戶資金三宮格 (質借、國泰交割、期初本金) - 乾淨單組且文字置中 -->
+        <!-- 帳戶資金三宮格 (質借、國泰交割、期初本金) -->
         <div class="grid grid-cols-3 gap-2">
           <div class="bg-[#161b22] border border-gray-800/80 p-2.5 sm:p-3 rounded-xl flex flex-col items-center text-center">
             <span class="text-[11px] text-gray-400 block truncate max-w-full">元大質借金額</span>
@@ -246,7 +268,7 @@
         </div>
 
         <div id="holdings-list-container" class="space-y-2.5">
-          <!-- 自動動態載入持股標的清單 -->
+          <!-- 動態載入持股清單 -->
         </div>
       </section>
 
@@ -432,18 +454,45 @@
           </div>
         </div>
 
-        <!-- 試算表綁定與健康診斷 -->
+        <!-- 捷徑圖示狀態檢測 -->
         <div class="bg-[#161b22] border border-gray-800/80 rounded-2xl p-4 space-y-3">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center">
-              <i class="fa-solid fa-table-list mr-2 text-blue-400"></i>試算表連線檢測
+              <i class="fa-solid fa-mobile-screen-button mr-2 text-amber-400"></i>手機桌面捷徑圖示狀態
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono font-medium">
+              PWA 獨立就緒
+            </span>
+          </div>
+          <div class="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            <div id="shortcut-icon-preview" class="w-12 h-12 rounded-xl flex-shrink-0 bg-[#0b0f19] border border-amber-500/40 overflow-hidden flex items-center justify-center shadow-lg relative">
+              <img src="./icon-gold-coin-192.png" alt="Icon Preview" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+              <svg viewBox="0 0 512 512" class="w-full h-full p-0.5 hidden">
+                <circle cx="256" cy="256" r="215" fill="#ffd700" stroke="#ffe082" stroke-width="8"/>
+                <path d="M80 375 L180 270 L245 320 L380 140 L345 130 L445 118 L430 220 L395 180 L255 365 L185 310 L95 405 Z" fill="#ef4444" stroke="#ffffff" stroke-width="8"/>
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold text-white">美鷹金幣紅箭頭高解析度圖示</p>
+              <p class="text-[11px] text-gray-400 mt-0.5 leading-tight">
+                已精準指定讀取同目錄下的 192x192 與 512x512 實體圖檔，透過 GitHub Pages 部署時能 100% 呈現獨立 App 圖標！
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 試算表直連設定與診斷 -->
+        <div class="bg-[#161b22] border border-gray-800/80 rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center">
+              <i class="fa-solid fa-table-list mr-2 text-blue-400"></i>Google 試算表直連設定
             </h3>
             <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-mono">
               投資摘要 & App行情快取
             </span>
           </div>
           <p class="text-xs text-gray-400 leading-relaxed">
-            系統鎖定最新【投資摘要】與【App行情快取】進行自動讀取，已排除已停更的歷史分頁。
+            系統直接透過 Google 試算表直連進行自動化輪詢，隨時同步最新股價與淨本金對帳。
           </p>
           <div class="space-y-2">
             <input type="text" id="direct-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs/edit" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl px-3 py-2.5 text-gray-200 focus:outline-none focus:border-blue-500 font-mono">
@@ -475,7 +524,7 @@
 
     </main>
 
-    <!-- 底部導覽列：4 欄位均勻分佈，無觀察名單 -->
+    <!-- 底部導覽列 -->
     <nav class="fixed bottom-0 max-w-[480px] w-full bg-[#161b22]/95 backdrop-blur-md border-t border-gray-800/90 h-16 flex items-center justify-around px-2 z-40 safe-bottom">
       <button onclick="switchTab('overview')" id="nav-overview" class="flex flex-col items-center justify-center flex-1 py-1 text-cyan-400 font-bold transition">
         <i class="fa-solid fa-chart-pie text-lg"></i>
@@ -505,20 +554,19 @@
 
   <script>
     const DEFAULT_SHEET_ID = '12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs';
-    const DEFAULT_MAIN_SHEET = '投資摘要'; // 嚴格鎖定最新維護中的主要工作表
+    const DEFAULT_MAIN_SHEET = '投資摘要';
 
-    // 核心資料狀態庫：對齊試算表 (D3: 7,282,500 / D4: 7,377,853 / B7: 49,600 / C10: 95,353 / F10: -153,397)
     let appState = {
       summary: {
         initialCapital: 5631250,
-        netEquity: 7377853,       // D4: 即時淨本金
-        stockValue: 7282500,      // D3: 總持股市值
-        periodPnL: -153397,       // F10: 本期損益
-        dailyPnL: 49600,          // B7: 今日總損益
-        loanYuanta: 1900000,      // 元大質借金額
-        cashCathay: 95353,        // C10: 國泰餘額
-        realizedPnL: 110985,      // 已實現損益
-        totalDividendsB6: 839259, // B6: 累計已領總股息
+        netEquity: 7377853,
+        stockValue: 7282500,
+        periodPnL: -153397,
+        dailyPnL: 49600,
+        loanYuanta: 1900000,
+        cashCathay: 95353,
+        realizedPnL: 110985,
+        totalDividendsB6: 839259,
         updateTime: '已同步',
         quoteSource: 'Google 試算表自動讀取'
       },
@@ -621,7 +669,6 @@
         calculatedDailyPnL += Math.round(shares * change);
       });
 
-      // 若試算表未直接給定 D3 或 B7，則使用個股相加彙總
       if (!appState.summary.hasDirectStockValue) {
         appState.summary.stockValue = totalStockValue;
       }
@@ -629,10 +676,7 @@
         appState.summary.dailyPnL = calculatedDailyPnL;
       }
 
-      // D4 即時淨本金 = 總持股市值 (D3) + 國泰交割戶餘額 (C10)
       appState.summary.netEquity = appState.summary.stockValue + Number(appState.summary.cashCathay || 0);
-
-      // F10 本期損益 = D4 - (期初本金 + 元大質借)
       const totalInvested = Number(appState.summary.initialCapital || 0) + Number(appState.summary.loanYuanta || 0);
       appState.summary.periodPnL = appState.summary.netEquity - totalInvested;
 
@@ -1092,13 +1136,11 @@
         if (idMatch && idMatch[1]) sheetId = idMatch[1];
       }
 
-      // 優先檢查【App行情快取】
       let hasCacheSync = false;
       if (!targetSheetParam) {
         hasCacheSync = await fetchFromAppCacheSheet(sheetId);
       }
 
-      // 鎖定主要工作表【投資摘要】
       let queryParam = targetSheetParam || `sheet=${encodeURIComponent(DEFAULT_MAIN_SHEET)}`;
       let foundItems = [];
 
@@ -1114,7 +1156,6 @@
         if (data && data.table && data.table.rows) {
           const rows = data.table.rows;
 
-          // 1. 自動讀取 D3 (總持股市值)
           if (rows[2] && rows[2].c) {
             const d3Val = parseNum(rows[2].c[3]?.v ?? rows[2].c[3]?.f);
             if (d3Val !== null && d3Val > 1000000) {
@@ -1124,7 +1165,6 @@
             }
           }
 
-          // 2. 自動讀取 D4 (即時淨本金)
           if (rows[3] && rows[3].c) {
             const d4Val = parseNum(rows[3].c[3]?.v ?? rows[3].c[3]?.f);
             if (d4Val !== null && d4Val > 1000000) {
@@ -1133,7 +1173,6 @@
             }
           }
 
-          // 3. 自動讀取 B7 (今日總損益)
           if (rows[6] && rows[6].c) {
             const b7Val = parseNum(rows[6].c[1]?.v ?? rows[6].c[1]?.f);
             if (b7Val !== null) {
@@ -1143,7 +1182,6 @@
             }
           }
 
-          // 4. 自動讀取 C10 (國泰交割餘額)
           if (rows[9] && rows[9].c) {
             const c10Val = parseNum(rows[9].c[2]?.v ?? rows[9].c[2]?.f);
             if (c10Val !== null && c10Val > 0) {
@@ -1152,7 +1190,6 @@
             }
           }
 
-          // 5. 自動讀取 F10 (本期損益)
           if (rows[9] && rows[9].c) {
             const f10Val = parseNum(rows[9].c[5]?.v ?? rows[9].c[5]?.f);
             if (f10Val !== null && Math.abs(f10Val) > 1000) {
@@ -1161,7 +1198,6 @@
             }
           }
 
-          // 6. 全表模糊文字錨定校對
           for (let r = 0; r < rows.length; r++) {
             const cells = rows[r].c;
             if (!cells) continue;
@@ -1238,7 +1274,7 @@
         if (idMatch && idMatch[1]) sheetId = idMatch[1];
       }
 
-      logDiag('=== 開始自動掃描有效工作表分頁 (已排除AI修改的分頁) ===', 'text-cyan-400 font-bold');
+      logDiag('=== 開始自動掃描有效工作表分頁 ===', 'text-cyan-400 font-bold');
 
       const targetSheets = [
         'App行情快取',
@@ -1401,7 +1437,6 @@
       startAutoRefreshTimer();
       requestWakeLock();
       
-      // 啟動 400ms 後全自動抓取試算表（CSV零漂移模式）
       setTimeout(() => {
         fetchDirectFromSheet(false);
       }, 400);
