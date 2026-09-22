@@ -220,7 +220,7 @@
         <div class="bg-cyan-950/40 border border-cyan-800/50 rounded-xl p-3 flex items-center justify-between text-xs">
           <div class="flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            <span class="text-cyan-200">數據引擎：<span id="quote-source-label" class="font-bold">投資摘要 B14:B16 直連</span></span>
+            <span class="text-cyan-200">數據引擎：<span id="quote-source-label" class="font-bold">投資總表 B14:B16 直連</span></span>
           </div>
           <button onclick="forceTriggerFullRefresh()" class="text-xs font-mono font-bold text-cyan-300 hover:text-cyan-200 flex items-center space-x-1 bg-cyan-900/60 border border-cyan-700/60 px-2.5 py-1 rounded-lg transition active:scale-95">
             <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
@@ -285,7 +285,7 @@
             <div class="flex items-center space-x-2">
               <h2 class="text-base font-bold text-white">核心持股庫存</h2>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center">
-                <i class="fa-solid fa-link mr-1 text-[9px] text-emerald-400"></i>試算表同步
+                <i class="fa-solid fa-link mr-1 text-[9px] text-emerald-400"></i>投資總表 B14:B16
               </span>
             </div>
             <p class="text-xs text-gray-400 mt-0.5">上方代號、下方名稱清楚陳列</p>
@@ -328,7 +328,7 @@
               <div class="flex items-center space-x-1.5 flex-wrap">
                 <span class="text-lg font-black font-mono text-white tracking-wide">00919</span>
                 <span class="text-[10px] font-mono font-bold text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.2 rounded">季配</span>
-                <span class="text-[9px] font-mono text-purple-400 bg-purple-950/80 border border-purple-800/60 px-1 py-0.2 rounded">B6</span>
+                <span class="text-[9px] font-mono text-purple-400 bg-purple-950/80 border border-purple-800/60 px-1 py-0.2 rounded">B16 直連</span>
               </div>
               <h3 class="text-sm font-bold text-gray-200 mt-1">群益臺灣精選高息</h3>
               <p class="text-xs text-gray-400 mt-0.5" id="div-desc-00919">持股數量: 150,000 股 (150 張)</p>
@@ -357,7 +357,7 @@
               <div class="flex items-center space-x-1.5 flex-wrap">
                 <span class="text-lg font-black font-mono text-white tracking-wide">00406A</span>
                 <span class="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.2 rounded">月配</span>
-                <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1 py-0.2 rounded">F & G欄</span>
+                <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1 py-0.2 rounded">B15 直連</span>
               </div>
               <h3 class="text-sm font-bold text-gray-200 mt-1">主動中信台灣收益</h3>
               <p class="text-xs text-gray-400 mt-0.5" id="shares-label-00406A">持股數量: 150,000 股 (150 張)</p>
@@ -386,7 +386,7 @@
               <div class="flex items-center space-x-1.5 flex-wrap">
                 <span class="text-lg font-black font-mono text-white tracking-wide">00400A</span>
                 <span class="text-[10px] font-mono font-bold text-blue-300 bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.2 rounded">月配</span>
-                <span class="text-[9px] font-mono text-blue-400 bg-blue-950/80 border border-blue-800/60 px-1 py-0.2 rounded">H & I欄</span>
+                <span class="text-[9px] font-mono text-blue-400 bg-blue-950/80 border border-blue-800/60 px-1 py-0.2 rounded">B14 直連</span>
               </div>
               <h3 class="text-sm font-bold text-gray-200 mt-1">主動國泰動能高息</h3>
               <p class="text-xs text-gray-400 mt-0.5" id="shares-label-00400A">持股數量: 70,000 股 (70 張)</p>
@@ -523,11 +523,11 @@
               <i class="fa-solid fa-table-list mr-2 text-blue-400"></i>Google 試算表直連設定
             </h3>
             <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-mono">
-              鎖定 B14:B16 專屬讀取
+              鎖定【投資總表】B14:B16
             </span>
           </div>
           <p class="text-xs text-gray-400 leading-relaxed">
-            系統精準讀取 Google 試算表【投資摘要】<span class="text-amber-400 font-mono font-bold">B14:B16</span>（絕對排除 E 欄），每 30 秒自動更新台股即時股價。
+            系統精準讀取 Google 試算表【<span class="text-cyan-300 font-bold">投資總表</span>】<span class="text-amber-400 font-mono font-bold">B14:B16</span>（B14: 00400A、B15: 00406A、B16: 00919），每 30 秒自動更新即時股價。
           </p>
           <div class="space-y-2">
             <input type="text" id="direct-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs/edit" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl px-3 py-2.5 text-gray-200 focus:outline-none focus:border-blue-500 font-mono">
@@ -589,7 +589,8 @@
 
   <script>
     const DEFAULT_SHEET_ID = '12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs';
-    const DEFAULT_MAIN_SHEET = '投資摘要';
+    const HOLDINGS_SHEET_NAME = '投資總表'; // 修正：精準讀取【投資總表】
+    const SUMMARY_SHEET_NAME = '投資摘要';
 
     let appState = {
       summary: {
@@ -603,7 +604,7 @@
         realizedPnL: 110985,
         totalDividendsB6: 839259,
         updateTime: '',
-        quoteSource: '投資摘要 B14:B16 直連'
+        quoteSource: '投資總表 B14:B16 直連'
       },
       holdings: [
         {
@@ -1165,85 +1166,6 @@
       diagLog.scrollTop = diagLog.scrollHeight;
     }
 
-    async function fetchFromAppCacheSheet(sheetId) {
-      const fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('App行情快取')}&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-      try {
-        const res = await fetch(fetchUrl);
-        if (!res.ok) return false;
-        const txt = await res.text();
-        const jsonStr = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonStr);
-
-        if (data && data.table && data.table.rows && data.table.rows.length > 0) {
-          let found = [];
-
-          for (const row of data.table.rows) {
-            if (!row.c) continue;
-
-            for (let i = 0; i < row.c.length; i++) {
-              const txt = cleanStr(row.c[i]?.v || row.c[i]?.f);
-
-              if (txt.includes('00919') || txt === '919') {
-                for (let k = i + 1; k < Math.min(i + 4, row.c.length); k++) {
-                  const p = parseNum(row.c[k]?.v ?? row.c[k]?.f);
-                  if (p !== null && p > 0) {
-                    const h = appState.holdings.find(x => x.code === '00919');
-                    if (h) {
-                      h.currentPrice = p;
-                      const chg = parseNum(row.c[k + 1]?.v ?? row.c[k + 1]?.f);
-                      if (chg !== null) h.change = chg;
-                      found.push(`00919:${p}`);
-                    }
-                    break;
-                  }
-                }
-              }
-
-              if (txt.includes('00406a') || txt.includes('406a')) {
-                for (let k = i + 1; k < Math.min(i + 4, row.c.length); k++) {
-                  const p = parseNum(row.c[k]?.v ?? row.c[k]?.f);
-                  if (p !== null && p > 0) {
-                    const h = appState.holdings.find(x => x.code === '00406A');
-                    if (h) {
-                      h.currentPrice = p;
-                      const chg = parseNum(row.c[k + 1]?.v ?? row.c[k + 1]?.f);
-                      if (chg !== null) h.change = chg;
-                      found.push(`00406A:${p}`);
-                    }
-                    break;
-                  }
-                }
-              }
-
-              if (txt.includes('00400a') || txt.includes('400a')) {
-                for (let k = i + 1; k < Math.min(i + 4, row.c.length); k++) {
-                  const p = parseNum(row.c[k]?.v ?? row.c[k]?.f);
-                  if (p !== null && p > 0) {
-                    const h = appState.holdings.find(x => x.code === '00400A');
-                    if (h) {
-                      h.currentPrice = p;
-                      const chg = parseNum(row.c[k + 1]?.v ?? row.c[k + 1]?.f);
-                      if (chg !== null) h.change = chg;
-                      found.push(`00400A:${p}`);
-                    }
-                    break;
-                  }
-                }
-              }
-            }
-          }
-
-          if (found.length > 0) {
-            logDiag(`從【App行情快取】同步完成：${found.join('、')}`, 'text-emerald-400 font-bold');
-            return true;
-          }
-        }
-      } catch (err) {
-        logDiag(`App行情快取連線嘗試: ${err.message}`, 'text-gray-400');
-      }
-      return false;
-    }
-
     async function fetchDailyPnLDatabase(sheetId) {
       const fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('每日損益資料庫')}&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       try {
@@ -1276,7 +1198,7 @@
       return false;
     }
 
-    async function fetchDirectFromSheet(showFeedback = false, targetSheetParam = null) {
+    async function fetchDirectFromSheet(showFeedback = false) {
       const diagStatus = document.getElementById('diag-status');
       const rawUrl = (document.getElementById('direct-sheet-url')?.value || '').trim() || localStorage.getItem('DIRECT_SHEET_URL') || '';
       let sheetId = DEFAULT_SHEET_ID;
@@ -1286,190 +1208,155 @@
         if (idMatch && idMatch[1]) sheetId = idMatch[1];
       }
 
-      // 1. 精準定向讀取【投資摘要】的 B14:B16 儲存格，杜絕讀成 E14:E16 的偏移
       let bRangeSuccess = false;
+      let foundItems = [];
+
+      // =========================================================================
+      // 1. 【關鍵修正】：精準讀取【投資總表】A14:B16（對應 B14=00400A, B15=00406A, B16=00919）
+      // =========================================================================
       try {
-        const bRangeUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DEFAULT_MAIN_SHEET)}&range=B14:B16&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-        const bRes = await fetch(bRangeUrl);
+        const holdingsRangeUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(HOLDINGS_SHEET_NAME)}&range=A14:B16&headers=0&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const bRes = await fetch(holdingsRangeUrl);
         if (bRes.ok) {
           const bTxt = await bRes.text();
           const bJsonStr = bTxt.substring(bTxt.indexOf('{'), bTxt.lastIndexOf('}') + 1);
           const bData = JSON.parse(bJsonStr);
 
           if (bData && bData.table && bData.table.rows && bData.table.rows.length >= 3) {
-            // Row 0 = B14 (00400A)
-            const pB14 = parseNum(bData.table.rows[0]?.c?.[0]?.v ?? bData.table.rows[0]?.c?.[0]?.f);
+            // Row 0 -> 對應第 14 列 (B14: 00400A)
+            const pB14 = parseNum(bData.table.rows[0]?.c?.[1]?.v ?? bData.table.rows[0]?.c?.[1]?.f);
             if (pB14 !== null && pB14 > 0) {
               const h400 = appState.holdings.find(x => x.code === '00400A');
               if (h400) {
                 h400.currentPrice = pB14;
                 if (h400.prevClose) h400.change = Number((pB14 - h400.prevClose).toFixed(2));
                 h400.isB14Locked = true;
+                foundItems.push(`B14(00400A):$${pB14}`);
               }
             }
 
-            // Row 1 = B15 (00406A)
-            const pB15 = parseNum(bData.table.rows[1]?.c?.[0]?.v ?? bData.table.rows[1]?.c?.[0]?.f);
+            // Row 1 -> 對應第 15 列 (B15: 00406A)
+            const pB15 = parseNum(bData.table.rows[1]?.c?.[1]?.v ?? bData.table.rows[1]?.c?.[1]?.f);
             if (pB15 !== null && pB15 > 0) {
               const h406 = appState.holdings.find(x => x.code === '00406A');
               if (h406) {
                 h406.currentPrice = pB15;
                 if (h406.prevClose) h406.change = Number((pB15 - h406.prevClose).toFixed(2));
                 h406.isB15Locked = true;
+                foundItems.push(`B15(00406A):$${pB15}`);
               }
             }
 
-            // Row 2 = B16 (00919)
-            const pB16 = parseNum(bData.table.rows[2]?.c?.[0]?.v ?? bData.table.rows[2]?.c?.[0]?.f);
+            // Row 2 -> 對應第 16 列 (B16: 00919)
+            const pB16 = parseNum(bData.table.rows[2]?.c?.[1]?.v ?? bData.table.rows[2]?.c?.[1]?.f);
             if (pB16 !== null && pB16 > 0) {
               const h919 = appState.holdings.find(x => x.code === '00919');
               if (h919) {
                 h919.currentPrice = pB16;
                 if (h919.prevClose) h919.change = Number((pB16 - h919.prevClose).toFixed(2));
                 h919.isB16Locked = true;
+                foundItems.push(`B16(00919):$${pB16}`);
               }
             }
 
-            logDiag(`精確鎖定讀取 B 欄成功：B14(00400A)=$${pB14} | B15(00406A)=$${pB15} | B16(00919)=$${pB16}`, 'text-emerald-400 font-bold');
+            logDiag(`成功讀取【投資總表】B14:B16 現價：B14=$${pB14} | B15=$${pB15} | B16=$${pB16}`, 'text-emerald-400 font-bold');
             bRangeSuccess = true;
           }
         }
       } catch (err) {
-        logDiag(`定向讀取 B14:B16 異常: ${err.message}`, 'text-amber-400');
+        logDiag(`讀取【投資總表】A14:B16 異常: ${err.message}`, 'text-amber-400');
       }
 
-      let hasCacheSync = false;
-      if (!targetSheetParam) {
-        // 若 B14:B16 未鎖定成功才允許快取備援
-        if (!bRangeSuccess) {
-          hasCacheSync = await fetchFromAppCacheSheet(sheetId);
-        }
-        await fetchDailyPnLDatabase(sheetId);
-      }
+      // =========================================================================
+      // 2. 歷史損益與總覽資料讀取（依序嘗試讀取投資總表/投資摘要）
+      // =========================================================================
+      await fetchDailyPnLDatabase(sheetId);
 
-      let queryParam = targetSheetParam || `sheet=${encodeURIComponent(DEFAULT_MAIN_SHEET)}`;
-      let foundItems = [];
+      const sheetsToCheck = [HOLDINGS_SHEET_NAME, SUMMARY_SHEET_NAME];
+      for (const sName of sheetsToCheck) {
+        try {
+          const fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sName)}&headers=0&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+          const res = await fetch(fetchUrl);
+          if (!res.ok) continue;
 
-      try {
-        const fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&${queryParam}&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-        const res = await fetch(fetchUrl);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const txt = await res.text();
+          const jsonStr = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1);
+          const data = JSON.parse(jsonStr);
 
-        const txt = await res.text();
-        const jsonStr = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonStr);
+          if (data && data.table && data.table.rows) {
+            const rows = data.table.rows;
 
-        if (data && data.table && data.table.rows) {
-          const rows = data.table.rows;
-
-          if (rows[2] && rows[2].c) {
-            const d3Val = parseNum(rows[2].c[3]?.v ?? rows[2].c[3]?.f);
-            if (d3Val !== null && d3Val > 1000000) {
-              appState.summary.stockValue = d3Val;
-              appState.summary.hasDirectStockValue = true;
-              foundItems.push(`D3(持股市值):$${fmt(d3Val)}`);
+            if (rows[2] && rows[2].c) {
+              const d3Val = parseNum(rows[2].c[3]?.v ?? rows[2].c[3]?.f);
+              if (d3Val !== null && d3Val > 1000000 && !appState.summary.hasDirectStockValue) {
+                appState.summary.stockValue = d3Val;
+                appState.summary.hasDirectStockValue = true;
+                foundItems.push(`D3(持股市值):$${fmt(d3Val)}`);
+              }
             }
-          }
 
-          if (rows[3] && rows[3].c) {
-            const d4Val = parseNum(rows[3].c[3]?.v ?? rows[3].c[3]?.f);
-            if (d4Val !== null && d4Val > 1000000) {
-              appState.summary.netEquity = d4Val;
-              foundItems.push(`D4(即時淨本金):$${fmt(d4Val)}`);
+            if (rows[3] && rows[3].c) {
+              const d4Val = parseNum(rows[3].c[3]?.v ?? rows[3].c[3]?.f);
+              if (d4Val !== null && d4Val > 1000000) {
+                appState.summary.netEquity = d4Val;
+                foundItems.push(`D4(即時淨本金):$${fmt(d4Val)}`);
+              }
             }
-          }
 
-          if (rows[6] && rows[6].c) {
-            const b7Val = parseNum(rows[6].c[1]?.v ?? rows[6].c[1]?.f);
-            if (b7Val !== null) {
-              appState.summary.dailyPnL = b7Val;
-              appState.summary.hasDirectDailyPnL = true;
-              foundItems.push(`B7(今日損益):${b7Val >= 0 ? '+' : ''}${fmt(b7Val)}`);
+            if (rows[6] && rows[6].c) {
+              const b7Val = parseNum(rows[6].c[1]?.v ?? rows[6].c[1]?.f);
+              if (b7Val !== null && !appState.summary.hasDirectDailyPnL) {
+                appState.summary.dailyPnL = b7Val;
+                appState.summary.hasDirectDailyPnL = true;
+                foundItems.push(`B7(今日損益):${b7Val >= 0 ? '+' : ''}${fmt(b7Val)}`);
+              }
             }
-          }
 
-          if (rows[9] && rows[9].c) {
-            const c10Val = parseNum(rows[9].c[2]?.v ?? rows[9].c[2]?.f);
-            if (c10Val !== null && c10Val > 0) {
-              appState.summary.cashCathay = c10Val;
-              foundItems.push(`C10(國泰餘額):$${fmt(c10Val)}`);
+            if (rows[9] && rows[9].c) {
+              const c10Val = parseNum(rows[9].c[2]?.v ?? rows[9].c[2]?.f);
+              if (c10Val !== null && c10Val > 0) {
+                appState.summary.cashCathay = c10Val;
+                foundItems.push(`C10(國泰餘額):$${fmt(c10Val)}`);
+              }
+              const f10Val = parseNum(rows[9].c[5]?.v ?? rows[9].c[5]?.f);
+              if (f10Val !== null && Math.abs(f10Val) > 1000) {
+                appState.summary.periodPnL = f10Val;
+                foundItems.push(`F10(本期損益):${f10Val >= 0 ? '+' : ''}${fmt(f10Val)}`);
+              }
             }
-          }
 
-          if (rows[9] && rows[9].c) {
-            const f10Val = parseNum(rows[9].c[5]?.v ?? rows[9].c[5]?.f);
-            if (f10Val !== null && Math.abs(f10Val) > 1000) {
-              appState.summary.periodPnL = f10Val;
-              foundItems.push(`F10(本期損益):${f10Val >= 0 ? '+' : ''}${fmt(f10Val)}`);
-            }
-          }
-
-          // 若先前定向讀取未取得，在此再次以嚴格 B 欄（c[1]）讀取，絕不讀取 c[4] (E欄)
-          const h400 = appState.holdings.find(x => x.code === '00400A');
-          if ((!h400 || !h400.isB14Locked) && rows[13] && rows[13].c && rows[13].c[1]) {
-            const p = parseNum(rows[13].c[1]?.v ?? rows[13].c[1]?.f);
-            if (p !== null && p > 0 && h400) {
-              h400.currentPrice = p;
-              if (h400.prevClose) h400.change = Number((p - h400.prevClose).toFixed(2));
-              foundItems.push(`B14(00400A現價):${p}`);
-            }
-          }
-
-          const h406 = appState.holdings.find(x => x.code === '00406A');
-          if ((!h406 || !h406.isB15Locked) && rows[14] && rows[14].c && rows[14].c[1]) {
-            const p = parseNum(rows[14].c[1]?.v ?? rows[14].c[1]?.f);
-            if (p !== null && p > 0 && h406) {
-              h406.currentPrice = p;
-              if (h406.prevClose) h406.change = Number((p - h406.prevClose).toFixed(2));
-              foundItems.push(`B15(00406A現價):${p}`);
-            }
-          }
-
-          const h919 = appState.holdings.find(x => x.code === '00919');
-          if ((!h919 || !h919.isB16Locked) && rows[15] && rows[15].c && rows[15].c[1]) {
-            const p = parseNum(rows[15].c[1]?.v ?? rows[15].c[1]?.f);
-            if (p !== null && p > 0 && h919) {
-              h919.currentPrice = p;
-              if (h919.prevClose) h919.change = Number((p - h919.prevClose).toFixed(2));
-              foundItems.push(`B16(00919現價):${p}`);
-            }
-          }
-
-          for (let r = 0; r < rows.length; r++) {
-            const cells = rows[r].c;
-            if (!cells) continue;
-
-            for (let c = 0; c < cells.length; c++) {
-              const cellText = cleanStr(cells[c]?.v || cells[c]?.f);
-
-              if (cellText.includes('國泰餘額') || cellText.includes('國泰交割')) {
-                const nextVal = parseNum(cells[c + 1]?.v ?? cells[c + 1]?.f);
-                if (nextVal !== null && nextVal > 0) {
-                  appState.summary.cashCathay = nextVal;
-                  foundItems.push(`國泰餘額:$${fmt(nextVal)}`);
+            for (let r = 0; r < rows.length; r++) {
+              const cells = rows[r].c;
+              if (!cells) continue;
+              for (let c = 0; c < cells.length; c++) {
+                const cellText = cleanStr(cells[c]?.v || cells[c]?.f);
+                if (cellText.includes('國泰餘額') || cellText.includes('國泰交割')) {
+                  const nextVal = parseNum(cells[c + 1]?.v ?? cells[c + 1]?.f);
+                  if (nextVal !== null && nextVal > 0) {
+                    appState.summary.cashCathay = nextVal;
+                  }
                 }
               }
             }
           }
+        } catch (e) {
+          // 容錯備援
         }
-
-        if (foundItems.length > 0 || bRangeSuccess || hasCacheSync) {
-          updateUI(true, true);
-          if (diagStatus) {
-            diagStatus.innerText = '自動連線成功 (已鎖定B欄)';
-            diagStatus.className = 'text-[10px] text-emerald-400 font-bold';
-          }
-          if (foundItems.length > 0) {
-            logDiag(`試算表同步成功：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
-          }
-          if (showFeedback) showToast('已成功讀取 B14:B16 最新行情！');
-          return true;
-        }
-      } catch (e) {
-        logDiag(`試算表自動讀取連線通知: ${e.message}`, 'text-amber-400');
       }
 
-      if (bRangeSuccess || hasCacheSync) return true;
+      if (foundItems.length > 0 || bRangeSuccess) {
+        updateUI(true, true);
+        if (diagStatus) {
+          diagStatus.innerText = '自動連線成功 (鎖定投資總表 B14:B16)';
+          diagStatus.className = 'text-[10px] text-emerald-400 font-bold';
+        }
+        if (foundItems.length > 0) {
+          logDiag(`同步完成：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
+        }
+        if (showFeedback) showToast('已成功讀取【投資總表】B14:B16 最新行情！');
+        return true;
+      }
+
       return false;
     }
 
@@ -1490,10 +1377,10 @@
       logDiag('=== 開始自動掃描有效工作表分頁 ===', 'text-cyan-400 font-bold');
 
       const targetSheets = [
+        '投資總表',
         '投資摘要',
         'App行情快取',
         '存股配息',
-        '投資總表',
         '每日損益資料庫'
       ];
 
