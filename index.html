@@ -523,11 +523,11 @@
               <i class="fa-solid fa-table-list mr-2 text-blue-400"></i>Google 試算表直連設定
             </h3>
             <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-mono">
-              投資摘要 B14:B16 專屬綁定
+              鎖定 B14:B16 專屬讀取
             </span>
           </div>
           <p class="text-xs text-gray-400 leading-relaxed">
-            系統直接讀取 Google 試算表【投資摘要】B14:B16 儲存格，每 30 秒自動更新台股即時股價。
+            系統精準讀取 Google 試算表【投資摘要】<span class="text-amber-400 font-mono font-bold">B14:B16</span>（絕對排除 E 欄），每 30 秒自動更新台股即時股價。
           </p>
           <div class="space-y-2">
             <input type="text" id="direct-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs/edit" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl px-3 py-2.5 text-gray-200 focus:outline-none focus:border-blue-500 font-mono">
@@ -1286,9 +1286,64 @@
         if (idMatch && idMatch[1]) sheetId = idMatch[1];
       }
 
+      // 1. 精準定向讀取【投資摘要】的 B14:B16 儲存格，杜絕讀成 E14:E16 的偏移
+      let bRangeSuccess = false;
+      try {
+        const bRangeUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DEFAULT_MAIN_SHEET)}&range=B14:B16&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const bRes = await fetch(bRangeUrl);
+        if (bRes.ok) {
+          const bTxt = await bRes.text();
+          const bJsonStr = bTxt.substring(bTxt.indexOf('{'), bTxt.lastIndexOf('}') + 1);
+          const bData = JSON.parse(bJsonStr);
+
+          if (bData && bData.table && bData.table.rows && bData.table.rows.length >= 3) {
+            // Row 0 = B14 (00400A)
+            const pB14 = parseNum(bData.table.rows[0]?.c?.[0]?.v ?? bData.table.rows[0]?.c?.[0]?.f);
+            if (pB14 !== null && pB14 > 0) {
+              const h400 = appState.holdings.find(x => x.code === '00400A');
+              if (h400) {
+                h400.currentPrice = pB14;
+                if (h400.prevClose) h400.change = Number((pB14 - h400.prevClose).toFixed(2));
+                h400.isB14Locked = true;
+              }
+            }
+
+            // Row 1 = B15 (00406A)
+            const pB15 = parseNum(bData.table.rows[1]?.c?.[0]?.v ?? bData.table.rows[1]?.c?.[0]?.f);
+            if (pB15 !== null && pB15 > 0) {
+              const h406 = appState.holdings.find(x => x.code === '00406A');
+              if (h406) {
+                h406.currentPrice = pB15;
+                if (h406.prevClose) h406.change = Number((pB15 - h406.prevClose).toFixed(2));
+                h406.isB15Locked = true;
+              }
+            }
+
+            // Row 2 = B16 (00919)
+            const pB16 = parseNum(bData.table.rows[2]?.c?.[0]?.v ?? bData.table.rows[2]?.c?.[0]?.f);
+            if (pB16 !== null && pB16 > 0) {
+              const h919 = appState.holdings.find(x => x.code === '00919');
+              if (h919) {
+                h919.currentPrice = pB16;
+                if (h919.prevClose) h919.change = Number((pB16 - h919.prevClose).toFixed(2));
+                h919.isB16Locked = true;
+              }
+            }
+
+            logDiag(`精確鎖定讀取 B 欄成功：B14(00400A)=$${pB14} | B15(00406A)=$${pB15} | B16(00919)=$${pB16}`, 'text-emerald-400 font-bold');
+            bRangeSuccess = true;
+          }
+        }
+      } catch (err) {
+        logDiag(`定向讀取 B14:B16 異常: ${err.message}`, 'text-amber-400');
+      }
+
       let hasCacheSync = false;
       if (!targetSheetParam) {
-        hasCacheSync = await fetchFromAppCacheSheet(sheetId);
+        // 若 B14:B16 未鎖定成功才允許快取備援
+        if (!bRangeSuccess) {
+          hasCacheSync = await fetchFromAppCacheSheet(sheetId);
+        }
         await fetchDailyPnLDatabase(sheetId);
       }
 
@@ -1349,43 +1404,34 @@
             }
           }
 
-          // 直接精確鎖定讀取 B14:B16 儲存格座標（row index 13~15, col index 1）
-          // B14: 00400A (現價 15.63)
-          if (rows[13] && rows[13].c && rows[13].c[1]) {
+          // 若先前定向讀取未取得，在此再次以嚴格 B 欄（c[1]）讀取，絕不讀取 c[4] (E欄)
+          const h400 = appState.holdings.find(x => x.code === '00400A');
+          if ((!h400 || !h400.isB14Locked) && rows[13] && rows[13].c && rows[13].c[1]) {
             const p = parseNum(rows[13].c[1]?.v ?? rows[13].c[1]?.f);
-            if (p !== null && p > 0) {
-              const h = appState.holdings.find(x => x.code === '00400A');
-              if (h) {
-                h.currentPrice = p;
-                if (h.prevClose) h.change = Number((p - h.prevClose).toFixed(2));
-                foundItems.push(`B14(00400A現價):${p}`);
-              }
+            if (p !== null && p > 0 && h400) {
+              h400.currentPrice = p;
+              if (h400.prevClose) h400.change = Number((p - h400.prevClose).toFixed(2));
+              foundItems.push(`B14(00400A現價):${p}`);
             }
           }
 
-          // B15: 00406A (現價 9.91)
-          if (rows[14] && rows[14].c && rows[14].c[1]) {
+          const h406 = appState.holdings.find(x => x.code === '00406A');
+          if ((!h406 || !h406.isB15Locked) && rows[14] && rows[14].c && rows[14].c[1]) {
             const p = parseNum(rows[14].c[1]?.v ?? rows[14].c[1]?.f);
-            if (p !== null && p > 0) {
-              const h = appState.holdings.find(x => x.code === '00406A');
-              if (h) {
-                h.currentPrice = p;
-                if (h.prevClose) h.change = Number((p - h.prevClose).toFixed(2));
-                foundItems.push(`B15(00406A現價):${p}`);
-              }
+            if (p !== null && p > 0 && h406) {
+              h406.currentPrice = p;
+              if (h406.prevClose) h406.change = Number((p - h406.prevClose).toFixed(2));
+              foundItems.push(`B15(00406A現價):${p}`);
             }
           }
 
-          // B16: 00919 (現價 32.3)
-          if (rows[15] && rows[15].c && rows[15].c[1]) {
+          const h919 = appState.holdings.find(x => x.code === '00919');
+          if ((!h919 || !h919.isB16Locked) && rows[15] && rows[15].c && rows[15].c[1]) {
             const p = parseNum(rows[15].c[1]?.v ?? rows[15].c[1]?.f);
-            if (p !== null && p > 0) {
-              const h = appState.holdings.find(x => x.code === '00919');
-              if (h) {
-                h.currentPrice = p;
-                if (h.prevClose) h.change = Number((p - h.prevClose).toFixed(2));
-                foundItems.push(`B16(00919現價):${p}`);
-              }
+            if (p !== null && p > 0 && h919) {
+              h919.currentPrice = p;
+              if (h919.prevClose) h919.change = Number((p - h919.prevClose).toFixed(2));
+              foundItems.push(`B16(00919現價):${p}`);
             }
           }
 
@@ -1403,64 +1449,27 @@
                   foundItems.push(`國泰餘額:$${fmt(nextVal)}`);
                 }
               }
-
-              /* 備援：若非剛好在 B14:B16，亦透過文字匹配名稱抓取右側數值 */
-              if (cellText.includes('00919') || cellText === '919') {
-                const p = parseNum(cells[c + 1]?.v ?? cells[c + 1]?.f);
-                if (p !== null && p > 0) {
-                  const h = appState.holdings.find(x => x.code === '00919');
-                  if (h && !foundItems.some(i => i.startsWith('B16'))) {
-                    h.currentPrice = p;
-                    if (h.prevClose) h.change = Number((p - h.prevClose).toFixed(2));
-                    foundItems.push(`00919(文字對齊):${p}`);
-                  }
-                }
-              }
-
-              if (cellText.includes('00406a') || cellText.includes('406a')) {
-                const p = parseNum(cells[c + 1]?.v ?? cells[c + 1]?.f);
-                if (p !== null && p > 0) {
-                  const h = appState.holdings.find(x => x.code === '00406A');
-                  if (h && !foundItems.some(i => i.startsWith('B15'))) {
-                    h.currentPrice = p;
-                    if (h.prevClose) h.change = Number((p - h.prevClose).toFixed(2));
-                    foundItems.push(`00406A(文字對齊):${p}`);
-                  }
-                }
-              }
-
-              if (cellText.includes('00400a') || cellText.includes('400a')) {
-                const p = parseNum(cells[c + 1]?.v ?? cells[c + 1]?.f);
-                if (p !== null && p > 0) {
-                  const h = appState.holdings.find(x => x.code === '00400A');
-                  if (h && !foundItems.some(i => i.startsWith('B14'))) {
-                    h.currentPrice = p;
-                    if (h.prevClose) h.change = Number((p - h.prevClose).toFixed(2));
-                    foundItems.push(`00400A(文字對齊):${p}`);
-                  }
-                }
-              }
             }
           }
         }
 
-        if (foundItems.length > 0 || hasCacheSync) {
+        if (foundItems.length > 0 || bRangeSuccess || hasCacheSync) {
           updateUI(true, true);
           if (diagStatus) {
-            diagStatus.innerText = '自動連線成功';
+            diagStatus.innerText = '自動連線成功 (已鎖定B欄)';
             diagStatus.className = 'text-[10px] text-emerald-400 font-bold';
           }
           if (foundItems.length > 0) {
-            logDiag(`試算表 B14:B16 自動連線成功：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
+            logDiag(`試算表同步成功：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
           }
-          if (showFeedback) showToast('已自動同步最新行情數據！');
+          if (showFeedback) showToast('已成功讀取 B14:B16 最新行情！');
           return true;
         }
       } catch (e) {
         logDiag(`試算表自動讀取連線通知: ${e.message}`, 'text-amber-400');
       }
 
-      if (hasCacheSync) return true;
+      if (bRangeSuccess || hasCacheSync) return true;
       return false;
     }
 
