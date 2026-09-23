@@ -1152,6 +1152,10 @@
       const cleaned = str.replace(/,/g, '').replace(/\$/g, '').replace(/%/g, '').replace(/\s/g, '');
       let n = parseFloat(cleaned);
       if (isNaN(n)) return null;
+      // 智慧處理：如果 Google 試算表回傳的是小數型態百分比（例如 0.0052 代表 0.52%），自動還原
+      if (Math.abs(n) > 0 && Math.abs(n) < 0.1 && str.includes('.')) {
+        // 如果原本字串沒帶 % 但數值小於 0.1，可能是小數格式，但此處我們主要針對百分比欄位調整
+      }
       return isNegative ? -Math.abs(n) : n;
     };
 
@@ -1228,7 +1232,9 @@
             // Row 0 -> 對應第 14 列 (00400A)
             const pB14 = parseNum(bData.table.rows[0]?.c?.[0]?.v ?? bData.table.rows[0]?.c?.[0]?.f);
             const cC14 = parseNum(bData.table.rows[0]?.c?.[1]?.v ?? bData.table.rows[0]?.c?.[1]?.f);
-            const dD14 = parseNum(bData.table.rows[0]?.c?.[2]?.v ?? bData.table.rows[0]?.c?.[2]?.f);
+            let dD14 = parseNum(bData.table.rows[0]?.c?.[2]?.v ?? bData.table.rows[0]?.c?.[2]?.f);
+            if (dD14 !== null && Math.abs(dD14) < 1 && dD14 !== 0) dD14 = dD14 * 100; // 自動將小數轉為百分比
+
             if (pB14 !== null && pB14 > 0) {
               const h400 = appState.holdings.find(x => x.code === '00400A');
               if (h400) {
@@ -1242,7 +1248,9 @@
             // Row 1 -> 對應第 15 列 (00406A)
             const pB15 = parseNum(bData.table.rows[1]?.c?.[0]?.v ?? bData.table.rows[1]?.c?.[0]?.f);
             const cC15 = parseNum(bData.table.rows[1]?.c?.[1]?.v ?? bData.table.rows[1]?.c?.[1]?.f);
-            const dD15 = parseNum(bData.table.rows[1]?.c?.[2]?.v ?? bData.table.rows[1]?.c?.[2]?.f);
+            let dD15 = parseNum(bData.table.rows[1]?.c?.[2]?.v ?? bData.table.rows[1]?.c?.[2]?.f);
+            if (dD15 !== null && Math.abs(dD15) < 1 && dD15 !== 0) dD15 = dD15 * 100;
+
             if (pB15 !== null && pB15 > 0) {
               const h406 = appState.holdings.find(x => x.code === '00406A');
               if (h406) {
@@ -1256,7 +1264,9 @@
             // Row 2 -> 對應第 16 列 (00919)
             const pB16 = parseNum(bData.table.rows[2]?.c?.[0]?.v ?? bData.table.rows[2]?.c?.[0]?.f);
             const cC16 = parseNum(bData.table.rows[2]?.c?.[1]?.v ?? bData.table.rows[2]?.c?.[1]?.f);
-            const dD16 = parseNum(bData.table.rows[2]?.c?.[2]?.v ?? bData.table.rows[2]?.c?.[2]?.f);
+            let dD16 = parseNum(bData.table.rows[2]?.c?.[2]?.v ?? bData.table.rows[2]?.c?.[2]?.f);
+            if (dD16 !== null && Math.abs(dD16) < 1 && dD16 !== 0) dD16 = dD16 * 100;
+
             if (pB16 !== null && pB16 > 0) {
               const h919 = appState.holdings.find(x => x.code === '00919');
               if (h919) {
