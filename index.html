@@ -220,7 +220,7 @@
         <div class="bg-cyan-950/40 border border-cyan-800/50 rounded-xl p-3 flex items-center justify-between text-xs">
           <div class="flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            <span class="text-cyan-200">數據引擎：<span id="quote-source-label" class="font-bold">投資總表 B14:B16 直連</span></span>
+            <span class="text-cyan-200">數據引擎：<span id="quote-source-label" class="font-bold">投資總表 B14:B16 & C14:C16 直連[cite: 1]</span></span>
           </div>
           <button onclick="forceTriggerFullRefresh()" class="text-xs font-mono font-bold text-cyan-300 hover:text-cyan-200 flex items-center space-x-1 bg-cyan-900/60 border border-cyan-700/60 px-2.5 py-1 rounded-lg transition active:scale-95">
             <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
@@ -285,7 +285,7 @@
             <div class="flex items-center space-x-2">
               <h2 class="text-base font-bold text-white">核心持股庫存</h2>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center">
-                <i class="fa-solid fa-link mr-1 text-[9px] text-emerald-400"></i>投資總表 B14:B16
+                <i class="fa-solid fa-link mr-1 text-[9px] text-emerald-400"></i>投資總表 B14:C16[cite: 1]
               </span>
             </div>
             <p class="text-xs text-gray-400 mt-0.5">上方代號、下方名稱清楚陳列</p>
@@ -328,7 +328,7 @@
               <div class="flex items-center space-x-1.5 flex-wrap">
                 <span class="text-lg font-black font-mono text-white tracking-wide">00919</span>
                 <span class="text-[10px] font-mono font-bold text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.2 rounded">季配</span>
-                <span class="text-[9px] font-mono text-purple-400 bg-purple-950/80 border border-purple-800/60 px-1 py-0.2 rounded">B16 直連</span>
+                <span class="text-[9px] font-mono text-purple-400 bg-purple-950/80 border border-purple-800/60 px-1 py-0.2 rounded">B16/C16 直連[cite: 1]</span>
               </div>
               <h3 class="text-sm font-bold text-gray-200 mt-1">群益臺灣精選高息</h3>
               <p class="text-xs text-gray-400 mt-0.5" id="div-desc-00919">持股數量: 150,000 股 (150 張)</p>
@@ -357,7 +357,7 @@
               <div class="flex items-center space-x-1.5 flex-wrap">
                 <span class="text-lg font-black font-mono text-white tracking-wide">00406A</span>
                 <span class="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.2 rounded">月配</span>
-                <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1 py-0.2 rounded">B15 直連</span>
+                <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1 py-0.2 rounded">B15/C15 直連[cite: 1]</span>
               </div>
               <h3 class="text-sm font-bold text-gray-200 mt-1">主動中信台灣收益</h3>
               <p class="text-xs text-gray-400 mt-0.5" id="shares-label-00406A">持股數量: 150,000 股 (150 張)</p>
@@ -386,7 +386,7 @@
               <div class="flex items-center space-x-1.5 flex-wrap">
                 <span class="text-lg font-black font-mono text-white tracking-wide">00400A</span>
                 <span class="text-[10px] font-mono font-bold text-blue-300 bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.2 rounded">月配</span>
-                <span class="text-[9px] font-mono text-blue-400 bg-blue-950/80 border border-blue-800/60 px-1 py-0.2 rounded">B14 直連</span>
+                <span class="text-[9px] font-mono text-blue-400 bg-blue-950/80 border border-blue-800/60 px-1 py-0.2 rounded">B14/C14 直連[cite: 1]</span>
               </div>
               <h3 class="text-sm font-bold text-gray-200 mt-1">主動國泰動能高息</h3>
               <p class="text-xs text-gray-400 mt-0.5" id="shares-label-00400A">持股數量: 70,000 股 (70 張)</p>
@@ -523,11 +523,11 @@
               <i class="fa-solid fa-table-list mr-2 text-blue-400"></i>Google 試算表直連設定
             </h3>
             <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-mono">
-              鎖定【投資總表】B14:B16
+              鎖定【投資總表】B14:C16[cite: 1]
             </span>
           </div>
           <p class="text-xs text-gray-400 leading-relaxed">
-            系統精準讀取 Google 試算表【<span class="text-cyan-300 font-bold">投資總表</span>】<span class="text-amber-400 font-mono font-bold">B14:B16</span>（B14: 00400A、B15: 00406A、B16: 00919），每 30 秒自動更新即時股價。
+            系統精準讀取 Google 試算表【<span class="text-cyan-300 font-bold">投資總表</span>】現價 <span class="text-amber-400 font-mono font-bold">B14:B16</span> 與漲跌 <span class="text-cyan-300 font-mono font-bold">C14:C16</span>（B14/C14: 00400A、B15/C15: 00406A、B16/C16: 00919），每 30 秒自動更新[cite: 1]。
           </p>
           <div class="space-y-2">
             <input type="text" id="direct-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs/edit" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl px-3 py-2.5 text-gray-200 focus:outline-none focus:border-blue-500 font-mono">
@@ -589,7 +589,7 @@
 
   <script>
     const DEFAULT_SHEET_ID = '12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs';
-    const HOLDINGS_SHEET_NAME = '投資總表'; // 修正：精準讀取【投資總表】
+    const HOLDINGS_SHEET_NAME = '投資總表'; // 精準讀取【投資總表】
     const SUMMARY_SHEET_NAME = '投資摘要';
 
     let appState = {
@@ -604,7 +604,7 @@
         realizedPnL: 110985,
         totalDividendsB6: 839259,
         updateTime: '',
-        quoteSource: '投資總表 B14:B16 直連'
+        quoteSource: '投資總表 B14:C16 直連[cite: 1]'
       },
       holdings: [
         {
@@ -615,7 +615,7 @@
           costTotal: 2991450,
           currentPrice: 32.30,
           prevClose: 32.27,
-          change: +0.03,
+          change: -0.21,
           marketValue: 4845000,
           unrealizedPnL: 1853550,
           returnRate: 61.96,
@@ -1212,10 +1212,10 @@
       let foundItems = [];
 
       // =========================================================================
-      // 1. 【關鍵修正】：精準讀取【投資總表】A14:B16（對應 B14=00400A, B15=00406A, B16=00919）
+      // 1. 【關鍵修正】：精準讀取【投資總表】B14:C16 (B欄=現價, C欄=漲跌)[cite: 1]
       // =========================================================================
       try {
-        const holdingsRangeUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(HOLDINGS_SHEET_NAME)}&range=A14:B16&headers=0&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const holdingsRangeUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(HOLDINGS_SHEET_NAME)}&range=B14:C16&headers=0&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
         const bRes = await fetch(holdingsRangeUrl);
         if (bRes.ok) {
           const bTxt = await bRes.text();
@@ -1223,48 +1223,48 @@
           const bData = JSON.parse(bJsonStr);
 
           if (bData && bData.table && bData.table.rows && bData.table.rows.length >= 3) {
-            // Row 0 -> 對應第 14 列 (B14: 00400A)
-            const pB14 = parseNum(bData.table.rows[0]?.c?.[1]?.v ?? bData.table.rows[0]?.c?.[1]?.f);
+            // Row 0 -> 對應第 14 列 (00400A): B14=現價, C14=漲跌
+            const pB14 = parseNum(bData.table.rows[0]?.c?.[0]?.v ?? bData.table.rows[0]?.c?.[0]?.f);
+            const cC14 = parseNum(bData.table.rows[0]?.c?.[1]?.v ?? bData.table.rows[0]?.c?.[1]?.f);
             if (pB14 !== null && pB14 > 0) {
               const h400 = appState.holdings.find(x => x.code === '00400A');
               if (h400) {
                 h400.currentPrice = pB14;
-                if (h400.prevClose) h400.change = Number((pB14 - h400.prevClose).toFixed(2));
-                h400.isB14Locked = true;
-                foundItems.push(`B14(00400A):$${pB14}`);
+                if (cC14 !== null) h400.change = cC14;
+                foundItems.push(`B14(00400A):$${pB14}, 漲跌:${cC14}`);
               }
             }
 
-            // Row 1 -> 對應第 15 列 (B15: 00406A)
-            const pB15 = parseNum(bData.table.rows[1]?.c?.[1]?.v ?? bData.table.rows[1]?.c?.[1]?.f);
+            // Row 1 -> 對應第 15 列 (00406A): B15=現價, C15=漲跌
+            const pB15 = parseNum(bData.table.rows[1]?.c?.[0]?.v ?? bData.table.rows[1]?.c?.[0]?.f);
+            const cC15 = parseNum(bData.table.rows[1]?.c?.[1]?.v ?? bData.table.rows[1]?.c?.[1]?.f);
             if (pB15 !== null && pB15 > 0) {
               const h406 = appState.holdings.find(x => x.code === '00406A');
               if (h406) {
                 h406.currentPrice = pB15;
-                if (h406.prevClose) h406.change = Number((pB15 - h406.prevClose).toFixed(2));
-                h406.isB15Locked = true;
-                foundItems.push(`B15(00406A):$${pB15}`);
+                if (cC15 !== null) h406.change = cC15;
+                foundItems.push(`B15(00406A):$${pB15}, 漲跌:${cC15}`);
               }
             }
 
-            // Row 2 -> 對應第 16 列 (B16: 00919)
-            const pB16 = parseNum(bData.table.rows[2]?.c?.[1]?.v ?? bData.table.rows[2]?.c?.[1]?.f);
+            // Row 2 -> 對應第 16 列 (00919): B16=現價, C16=漲跌
+            const pB16 = parseNum(bData.table.rows[2]?.c?.[0]?.v ?? bData.table.rows[2]?.c?.[0]?.f);
+            const cC16 = parseNum(bData.table.rows[2]?.c?.[1]?.v ?? bData.table.rows[2]?.c?.[1]?.f);
             if (pB16 !== null && pB16 > 0) {
               const h919 = appState.holdings.find(x => x.code === '00919');
               if (h919) {
                 h919.currentPrice = pB16;
-                if (h919.prevClose) h919.change = Number((pB16 - h919.prevClose).toFixed(2));
-                h919.isB16Locked = true;
-                foundItems.push(`B16(00919):$${pB16}`);
+                if (cC16 !== null) h919.change = cC16;
+                foundItems.push(`B16(00919):$${pB16}, 漲跌:${cC16}`);
               }
             }
 
-            logDiag(`成功讀取【投資總表】B14:B16 現價：B14=$${pB14} | B15=$${pB15} | B16=$${pB16}`, 'text-emerald-400 font-bold');
+            logDiag(`成功讀取【投資總表】B14:B16 現價與 C14:C16 漲跌[cite: 1]`, 'text-emerald-400 font-bold');
             bRangeSuccess = true;
           }
         }
       } catch (err) {
-        logDiag(`讀取【投資總表】A14:B16 異常: ${err.message}`, 'text-amber-400');
+        logDiag(`讀取【投資總表】B14:C16 異常: ${err.message}`, 'text-amber-400');
       }
 
       // =========================================================================
@@ -1347,13 +1347,13 @@
       if (foundItems.length > 0 || bRangeSuccess) {
         updateUI(true, true);
         if (diagStatus) {
-          diagStatus.innerText = '自動連線成功 (鎖定投資總表 B14:B16)';
+          diagStatus.innerText = '自動連線成功 (現價 B14:B16、漲跌 C14:C16)[cite: 1]';
           diagStatus.className = 'text-[10px] text-emerald-400 font-bold';
         }
         if (foundItems.length > 0) {
           logDiag(`同步完成：${foundItems.join(', ')}`, 'text-emerald-400 font-semibold');
         }
-        if (showFeedback) showToast('已成功讀取【投資總表】B14:B16 最新行情！');
+        if (showFeedback) showToast('已成功讀取【投資總表】B14:B16 現價與 C14:C16 漲跌！[cite: 1]');
         return true;
       }
 
