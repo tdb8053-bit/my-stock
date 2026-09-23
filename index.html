@@ -608,7 +608,7 @@
           costPrice: 19.943,
           costTotal: 2991450,
           currentPrice: 32.06,
-          change: -0.1,
+          change: -0.10,
           changePercent: -0.31,
           marketValue: 4809000,
           unrealizedPnL: 1817550,
@@ -623,12 +623,12 @@
           shares: 150000,
           costPrice: 9.275,
           costTotal: 1391250,
-          currentPrice: 9.91,
-          change: +0.21,
-          changePercent: +2.16,
-          marketValue: 1486500,
-          unrealizedPnL: 95250,
-          returnRate: 6.85,
+          currentPrice: 9.92,
+          change: +0.08,
+          changePercent: +0.81,
+          marketValue: 1488000,
+          unrealizedPnL: 96750,
+          returnRate: 6.95,
           totalDividends: 28820,
           divFreq: '月配',
           divEstPerUnit: 0.125
@@ -639,12 +639,12 @@
           shares: 70000,
           costPrice: 14.79,
           costTotal: 1034966,
-          currentPrice: 15.63,
-          change: +0.41,
-          changePercent: +2.69,
-          marketValue: 1094100,
-          unrealizedPnL: 59134,
-          returnRate: 5.71,
+          currentPrice: 15.57,
+          change: +0.08,
+          changePercent: +0.52,
+          marketValue: 1089900,
+          unrealizedPnL: 54934,
+          returnRate: 5.31,
           totalDividends: 34200,
           divFreq: '月配',
           divEstPerUnit: 0.13
@@ -872,7 +872,7 @@
                   庫存: <span class="text-gray-200 font-mono font-bold">${fmt(h.shares)} 股</span> (${(h.shares/1000).toFixed(0)} 張)
                 </div>
               </div>
-              <!-- 右側改為三排獨立顯示：股價、漲跌金額、漲跌% -->
+              <!-- 右側三排獨立顯示：第1排股價、第2排漲跌金額、第3排漲跌% -->
               <div class="text-right flex-shrink-0 flex flex-col space-y-0.5">
                 <div class="text-[19px] font-black font-mono text-white tracking-tight">
                   ${fmtDec(h.currentPrice)}
