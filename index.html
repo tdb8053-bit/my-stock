@@ -220,7 +220,7 @@
         <div class="bg-cyan-950/40 border border-cyan-800/50 rounded-xl p-3 flex items-center justify-between text-xs">
           <div class="flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            <span class="text-cyan-200">數據引擎：<span id="quote-source-label" class="font-bold">投資總表 B14:E16 直連</span></span>
+            <span class="text-cyan-200">數據引擎：<span id="quote-source-label" class="font-bold">投資總表 B14:K16 直連</span></span>
           </div>
           <button onclick="forceTriggerFullRefresh()" class="text-xs font-mono font-bold text-cyan-300 hover:text-cyan-200 flex items-center space-x-1 bg-cyan-900/60 border border-cyan-700/60 px-2.5 py-1 rounded-lg transition active:scale-95">
             <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
@@ -331,7 +331,7 @@
             </div>
             <div class="text-right flex-shrink-0">
               <span class="text-xs text-gray-400 block font-medium">累計已領股息</span>
-              <div class="text-base font-black text-amber-400 font-mono" id="div-collected-00919">$776,239</div>
+              <div class="text-base font-black text-amber-400 font-mono" id="div-collected-00919">$839,259</div>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-800 text-sm">
@@ -355,7 +355,7 @@
                 <span class="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.2 rounded">月配</span>
               </div>
               <h3 class="text-sm font-bold text-gray-200 mt-1">主動中信台灣收益</h3>
-              <p class="text-xs text-gray-400 mt-0.5" id="shares-label-00406A">持股數量: 160,000 股 (160 張)</p>
+              <p class="text-xs text-gray-400 mt-0.5" id="shares-label-00406A">持股數量: 180,000 股 (180 張)</p>
             </div>
             <div class="text-right flex-shrink-0">
               <span class="text-xs text-gray-400 block font-medium">累計已領股息</span>
@@ -517,11 +517,11 @@
               <i class="fa-solid fa-table-list mr-2 text-blue-400"></i>Google 試算表直連設定
             </h3>
             <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-mono">
-              鎖定【投資總表】B14:E16
+              鎖定【投資總表】B14:K16
             </span>
           </div>
           <p class="text-xs text-gray-400 leading-relaxed">
-            系統精準讀取 Google 試算表【<span class="text-cyan-300 font-bold">投資總表</span>】現價 <span class="text-amber-400 font-mono font-bold">B14:B16</span>、漲跌 <span class="text-cyan-300 font-mono font-bold">C14:C16</span>、漲跌% <span class="text-purple-300 font-mono font-bold">D14:D16</span> 與庫存股數 <span class="text-emerald-400 font-mono font-bold">E14:E16</span>。
+            系統精準讀取 Google 試算表【<span class="text-cyan-300 font-bold">投資總表</span>】現價 <span class="text-amber-400 font-mono font-bold">B14:B16</span>、漲跌 <span class="text-cyan-300 font-mono font-bold">C14:C16</span>、漲跌% <span class="text-purple-300 font-mono font-bold">D14:D16</span> 與庫存股數 <span class="text-emerald-400 font-mono font-bold">E14:E16</span>、成本均價 <span class="text-amber-400 font-mono font-bold">F14:F16</span> 與未實現損益 <span class="text-rose-400 font-mono font-bold">K14:K16</span>。
           </p>
           <div class="space-y-2">
             <input type="text" id="direct-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/12-HUOgFk7qoElBotdCJVjUqb61t_OmfSbtRSMCbYOfs/edit" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl px-3 py-2.5 text-gray-200 focus:outline-none focus:border-blue-500 font-mono">
@@ -598,7 +598,7 @@
         realizedPnL: 110985,
         totalDividendsB6: 839259,
         updateTime: '',
-        quoteSource: '投資總表 B14:E16 直連'
+        quoteSource: '投資總表 B14:K16 直連'
       },
       holdings: [
         {
@@ -613,22 +613,23 @@
           marketValue: 4809000,
           unrealizedPnL: 1817550,
           returnRate: 60.76,
-          totalDividends: 776239,
+          totalDividends: 839259,
           divFreq: '季配',
           divEstPerUnit: 1.0
         },
         {
           code: '00406A',
           name: '主動中信台灣收益',
-          shares: 160000, // 對應 E15
-          costPrice: 9.325,
-          costTotal: 1491990,
-          currentPrice: 9.92,
-          change: +0.08,
-          changePercent: +0.81,
-          marketValue: 1587200,
-          unrealizedPnL: 95210,
-          returnRate: 6.38,
+          shares: 180000, // 對應 E15 (180張)
+          costPrice: 9.396, // 對應持股總表 F15
+          costTotal: 1691360,
+          currentPrice: 9.85,
+          change: -0.15,
+          changePercent: -1.50,
+          marketValue: 1773000,
+          unrealizedPnL: 81635, // 對應持股總表 K15
+          directPnL: 81635,
+          returnRate: 4.83,
           totalDividends: 28820,
           divFreq: '月配',
           divEstPerUnit: 0.125
@@ -710,7 +711,11 @@
 
         h.marketValue = Math.round(shares * price);
         const costTotal = h.costTotal || (shares * costPrice);
-        h.unrealizedPnL = Math.round(h.marketValue - costTotal);
+        if (h.directPnL !== undefined && h.directPnL !== null) {
+          h.unrealizedPnL = h.directPnL;
+        } else {
+          h.unrealizedPnL = Math.round(h.marketValue - costTotal);
+        }
         h.returnRate = costTotal > 0 ? Number(((h.unrealizedPnL / costTotal) * 100).toFixed(2)) : 0;
 
         totalStockValue += h.marketValue;
@@ -845,7 +850,7 @@
       container.innerHTML = activeHoldings.map(h => {
         const calcMarketVal = h.marketValue || Math.round(h.shares * h.currentPrice);
         const costTotal = h.costTotal || (h.shares * h.costPrice);
-        const calcUnrealizedPnL = Math.round(calcMarketVal - costTotal);
+        const calcUnrealizedPnL = (h.directPnL !== undefined && h.directPnL !== null) ? h.directPnL : Math.round(calcMarketVal - costTotal);
         const calcReturnRate = costTotal > 0 ? Number(((calcUnrealizedPnL / costTotal) * 100).toFixed(2)) : 0;
 
         const isUp = calcUnrealizedPnL >= 0;
@@ -918,7 +923,7 @@
         const aVal = qVal * 4;
 
         if (desc919) desc919.innerText = `持股數量: ${fmt(h919.shares)} 股 (${(h919.shares/1000).toFixed(0)} 張)`;
-        if (col919) col919.innerText = '$' + fmt(h919.totalDividends || 776239);
+        if (col919) col919.innerText = '$' + fmt(h919.totalDividends || 839259);
         if (q919) q919.innerHTML = `$${fmt(qVal)} <span class="text-xs text-gray-400 font-normal">($${h919.divEstPerUnit}/股)</span>`;
         if (a919) a919.innerText = '$' + fmt(aVal);
       }
@@ -1214,10 +1219,10 @@
       let foundItems = [];
 
       // =========================================================================
-      // 1. 讀取【投資總表】B14:E16 (B欄=現價, C欄=漲跌, D欄=漲跌%, E欄=庫存數量)
+      // 1. 讀取【投資總表】B14:K16 (含成本均價 F14:F16 與未實現損益 K14:K16)
       // =========================================================================
       try {
-        const holdingsRangeUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(HOLDINGS_SHEET_NAME)}&range=B14:E16&headers=0&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const holdingsRangeUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(HOLDINGS_SHEET_NAME)}&range=B14:K16&headers=0&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
         const bRes = await fetch(holdingsRangeUrl);
         if (bRes.ok) {
           const bTxt = await bRes.text();
@@ -1231,6 +1236,8 @@
             let dD14 = parseNum(bData.table.rows[0]?.c?.[2]?.v ?? bData.table.rows[0]?.c?.[2]?.f);
             if (dD14 !== null && Math.abs(dD14) < 1 && dD14 !== 0) dD14 = dD14 * 100;
             const sE14 = parseNum(bData.table.rows[0]?.c?.[3]?.v ?? bData.table.rows[0]?.c?.[3]?.f);
+            const costF14 = parseNum(bData.table.rows[0]?.c?.[4]?.v ?? bData.table.rows[0]?.c?.[4]?.f);
+            const pnlK14 = parseNum(bData.table.rows[0]?.c?.[9]?.v ?? bData.table.rows[0]?.c?.[9]?.f);
 
             const h400 = appState.holdings.find(x => x.code === '00400A');
             if (h400) {
@@ -1238,6 +1245,8 @@
               if (cC14 !== null) h400.change = cC14;
               if (dD14 !== null) h400.changePercent = dD14;
               if (sE14 !== null && sE14 >= 0) h400.shares = sE14;
+              if (costF14 !== null && costF14 > 0) h400.costPrice = costF14;
+              if (pnlK14 !== null) { h400.unrealizedPnL = pnlK14; h400.directPnL = pnlK14; }
               foundItems.push(`00400A(14列): 現價$${h400.currentPrice}, 庫存:${fmt(h400.shares)}股`);
             }
 
@@ -1247,6 +1256,8 @@
             let dD15 = parseNum(bData.table.rows[1]?.c?.[2]?.v ?? bData.table.rows[1]?.c?.[2]?.f);
             if (dD15 !== null && Math.abs(dD15) < 1 && dD15 !== 0) dD15 = dD15 * 100;
             const sE15 = parseNum(bData.table.rows[1]?.c?.[3]?.v ?? bData.table.rows[1]?.c?.[3]?.f);
+            const costF15 = parseNum(bData.table.rows[1]?.c?.[4]?.v ?? bData.table.rows[1]?.c?.[4]?.f); // F15
+            const pnlK15 = parseNum(bData.table.rows[1]?.c?.[9]?.v ?? bData.table.rows[1]?.c?.[9]?.f);  // K15
 
             const h406 = appState.holdings.find(x => x.code === '00406A');
             if (h406) {
@@ -1254,7 +1265,9 @@
               if (cC15 !== null) h406.change = cC15;
               if (dD15 !== null) h406.changePercent = dD15;
               if (sE15 !== null && sE15 >= 0) h406.shares = sE15;
-              foundItems.push(`00406A(15列): 現價$${h406.currentPrice}, 庫存:${fmt(h406.shares)}股`);
+              if (costF15 !== null && costF15 > 0) h406.costPrice = costF15; // 成本均價=F15 (9.396)
+              if (pnlK15 !== null) { h406.unrealizedPnL = pnlK15; h406.directPnL = pnlK15; } // 未實現損益=K15 (81,635)
+              foundItems.push(`00406A(15列): 現價$${h406.currentPrice}, 均價:$${h406.costPrice}, 損益:${h406.unrealizedPnL}`);
             }
 
             // Row 2 -> 對應第 16 列 (00919 群益台灣精選高息)
@@ -1263,6 +1276,8 @@
             let dD16 = parseNum(bData.table.rows[2]?.c?.[2]?.v ?? bData.table.rows[2]?.c?.[2]?.f);
             if (dD16 !== null && Math.abs(dD16) < 1 && dD16 !== 0) dD16 = dD16 * 100;
             const sE16 = parseNum(bData.table.rows[2]?.c?.[3]?.v ?? bData.table.rows[2]?.c?.[3]?.f);
+            const costF16 = parseNum(bData.table.rows[2]?.c?.[4]?.v ?? bData.table.rows[2]?.c?.[4]?.f);
+            const pnlK16 = parseNum(bData.table.rows[2]?.c?.[9]?.v ?? bData.table.rows[2]?.c?.[9]?.f);
 
             const h919 = appState.holdings.find(x => x.code === '00919');
             if (h919) {
@@ -1270,15 +1285,40 @@
               if (cC16 !== null) h919.change = cC16;
               if (dD16 !== null) h919.changePercent = dD16;
               if (sE16 !== null && sE16 >= 0) h919.shares = sE16;
+              if (costF16 !== null && costF16 > 0) h919.costPrice = costF16;
+              if (pnlK16 !== null) { h919.unrealizedPnL = pnlK16; h919.directPnL = pnlK16; }
               foundItems.push(`00919(16列): 現價$${h919.currentPrice}, 庫存:${fmt(h919.shares)}股`);
             }
 
-            logDiag(`成功讀取【投資總表】B14:E16 現價與庫存數量 (E14:E16)`, 'text-emerald-400 font-bold');
+            logDiag(`成功讀取【投資總表】B14:K16 現價、庫存、成本均價(F)與損益(K)`, 'text-emerald-400 font-bold');
             bRangeSuccess = true;
           }
         }
       } catch (err) {
-        logDiag(`讀取【投資總表】B14:E16 異常: ${err.message}`, 'text-amber-400');
+        logDiag(`讀取【投資總表】B14:K16 異常: ${err.message}`, 'text-amber-400');
+      }
+
+      // =========================================================================
+      // 1.1 讀取【存股配息】工作表 B6 (00919 累計已領股息)
+      // =========================================================================
+      try {
+        const divB6Url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('存股配息')}&range=B6:B6&headers=0&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const divRes = await fetch(divB6Url);
+        if (divRes.ok) {
+          const divTxt = await divRes.text();
+          const divJsonStr = divTxt.substring(divTxt.indexOf('{'), divTxt.lastIndexOf('}') + 1);
+          const divData = JSON.parse(divJsonStr);
+          const b6Val = parseNum(divData?.table?.rows?.[0]?.c?.[0]?.v ?? divData?.table?.rows?.[0]?.c?.[0]?.f);
+          if (b6Val !== null && b6Val > 0) {
+            appState.summary.totalDividendsB6 = b6Val;
+            const h919 = appState.holdings.find(x => x.code === '00919');
+            if (h919) h919.totalDividends = b6Val;
+            foundItems.push(`存股配息(B6):$${fmt(b6Val)}`);
+            logDiag(`成功讀取【存股配息】B6 累計已領股息: $${fmt(b6Val)}`, 'text-emerald-400 font-bold');
+          }
+        }
+      } catch (divErr) {
+        logDiag(`讀取【存股配息】B6 異常: ${divErr.message}`, 'text-amber-400');
       }
 
       // =========================================================================
@@ -1348,7 +1388,7 @@
           diagStatus.innerText = '自動連線成功 (含 E14:E16 庫存數量)';
           diagStatus.className = 'text-[10px] text-emerald-400 font-bold';
         }
-        if (showFeedback) showToast('已成功讀取【投資總表】B14:E16 行情與庫存！');
+        if (showFeedback) showToast('已成功讀取【投資總表】B14:K16 行情與庫存！');
         return true;
       }
 
