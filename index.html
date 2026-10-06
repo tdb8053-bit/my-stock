@@ -417,7 +417,7 @@
             </span>
           </div>
 
-          <div class="overflow-x-auto no-scrollbar">
+          <div id="monthly-dividends-scroll" class="overflow-x-auto overflow-y-auto no-scrollbar max-h-[340px] overscroll-contain">
             <table class="w-full text-left whitespace-nowrap table-fixed">
               <colgroup>
                 <col class="w-[24%]">
@@ -425,7 +425,7 @@
                 <col class="w-[24%]">
                 <col class="w-[28%]">
               </colgroup>
-              <thead>
+              <thead class="sticky top-0 z-10 bg-[#161b22]">
                 <tr class="border-b border-gray-800 text-[11px]">
                   <th class="pb-2.5 pl-1 font-black text-gray-300 text-left">入息月份</th>
                   <th class="pb-2.5 px-1 text-right font-black text-blue-300">00400A</th>
@@ -435,8 +435,8 @@
               </thead>
               <tbody id="monthly-dividends-tbody" class="divide-y divide-gray-800/60 font-mono">
               </tbody>
-              <tfoot>
-                <tr class="border-t border-gray-700 bg-gray-900/40 font-black">
+              <tfoot class="sticky bottom-0 z-10 bg-[#161b22]">
+                <tr class="border-t border-gray-700 bg-gray-900/95 font-black">
                   <td class="py-3 pl-1 text-gray-200 font-sans font-black text-xs">合計領息</td>
                   <td id="div-sum-g" class="py-3 px-1 text-right font-black text-blue-300 font-mono text-sm">$34,200</td>
                   <td id="div-sum-l" class="py-3 px-1 text-right font-black text-cyan-300 font-mono text-sm">$28,820</td>
@@ -649,6 +649,7 @@
         }
       ],
       monthlyDividends: [
+        { month: '2026/12', gVal: 0, lVal: 0 },
         { month: '2026/11', gVal: 0, lVal: 0 },
         { month: '2026/10', gVal: 6000, lVal: 24840 },
         { month: '2026/09', gVal: 12000, lVal: 17940 },
@@ -1126,7 +1127,11 @@
                 ticks: { color: '#64748b', font: { size: 10, weight: 'bold' } } 
               },
               y: {
-                grid: { color: 'rgba(51, 65, 85, 0.25)' },
+                beginAtZero: true,
+                grid: {
+                  color: ctx => (ctx.tick && Number(ctx.tick.value) === 0) ? '#ef4444' : 'rgba(51, 65, 85, 0.25)',
+                  lineWidth: ctx => (ctx.tick && Number(ctx.tick.value) === 0) ? 2 : 1
+                },
                 ticks: {
                   color: '#64748b',
                   font: { size: 10, weight: 'bold' },
@@ -1156,6 +1161,77 @@
       if (isNaN(n)) return null;
       return isNegative ? -Math.abs(n) : n;
     };
+
+    async function fetchMonthlyDividends(sheetId) {
+      const fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('存股配息')}&range=C8:L120&headers=0&_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      try {
+        const res = await fetch(fetchUrl);
+        if (!res.ok) return false;
+
+        const txt = await res.text();
+        const jsonStr = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonStr);
+        const rows = data?.table?.rows || [];
+        const parsedRows = [];
+
+        for (const row of rows) {
+          const c = row?.c || [];
+          const monthRaw = String(c[0]?.f ?? c[0]?.v ?? '').trim(); // C欄：月份
+          const match = monthRaw.match(/(\d{4})\s*年\s*(\d{1,2})\s*月/);
+          if (!match) continue;
+
+          const year = Number(match[1]);
+          const month = Number(match[2]);
+          const monthKey = year * 100 + month;
+          const monthLabel = `${year}/${String(month).padStart(2, '0')}`;
+
+          // C:L 範圍內，G 是索引 4、L 是索引 9。
+          const gRaw = c[4]?.v ?? c[4]?.f ?? null;
+          const lRaw = c[9]?.v ?? c[9]?.f ?? null;
+          const gHasCell = gRaw !== null && String(gRaw).trim() !== '';
+          const lHasCell = lRaw !== null && String(lRaw).trim() !== '';
+          const gVal = parseNum(gRaw);
+          const lVal = parseNum(lRaw);
+
+          parsedRows.push({
+            month: monthLabel,
+            monthKey,
+            gVal: gVal ?? 0,
+            lVal: lVal ?? 0,
+            isReadyMonth: gHasCell && lHasCell
+          });
+        }
+
+        if (parsedRows.length === 0) return false;
+
+        // 最新月份以 G、L 兩個配息儲存格都已存在內容為準。
+        // 目前因此會停在 2026/12；未來下一月份兩欄有資料後會自動往前推。
+        const readyRows = parsedRows.filter(item => item.isReadyMonth);
+        if (readyRows.length === 0) return false;
+        const newestReadyKey = Math.max(...readyRows.map(item => item.monthKey));
+
+        const visibleHistory = parsedRows
+          .filter(item => item.monthKey <= newestReadyKey)
+          .sort((a, b) => b.monthKey - a.monthKey)
+          .map(({ month, gVal, lVal }) => ({ month, gVal, lVal }));
+
+        if (visibleHistory.length === 0) return false;
+        appState.monthlyDividends = visibleHistory;
+
+        const totalG = visibleHistory.reduce((sum, item) => sum + Number(item.gVal || 0), 0);
+        const totalL = visibleHistory.reduce((sum, item) => sum + Number(item.lVal || 0), 0);
+        const h400 = appState.holdings.find(x => x.code === '00400A');
+        const h406 = appState.holdings.find(x => x.code === '00406A');
+        if (h400) h400.totalDividends = totalG;
+        if (h406) h406.totalDividends = totalL;
+
+        logDiag(`成功讀取【存股配息】月度明細 C/G/L，共 ${visibleHistory.length} 個月份；最新月份 ${visibleHistory[0].month}`, 'text-cyan-400');
+        return true;
+      } catch (err) {
+        logDiag(`讀取【存股配息】月度明細 C/G/L 異常: ${err.message}`, 'text-amber-400');
+        return false;
+      }
+    }
 
     function logDiag(msg, cls = 'text-gray-300') {
       const diagLog = document.getElementById('diagnostic-log');
@@ -1325,6 +1401,11 @@
       } catch (divErr) {
         logDiag(`讀取【存股配息】B6:C6 異常: ${divErr.message}`, 'text-amber-400');
       }
+
+      // =========================================================================
+      // 1.2 讀取【存股配息】月度配息明細：C欄月份、G欄00400A、L欄00406A
+      // =========================================================================
+      await fetchMonthlyDividends(sheetId);
 
       // =========================================================================
       // 2. 歷史損益與總覽資料讀取
