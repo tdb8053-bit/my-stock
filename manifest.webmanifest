@@ -8,7 +8,7 @@
   "background_color": "#080b10",
   "theme_color": "#11151c",
   "icons": [
-    {"src":"./icon-gold-coin-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"./icon-gold-coin-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {"src":"./icon-asset-manager-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icon-asset-manager-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
   ]
 }
