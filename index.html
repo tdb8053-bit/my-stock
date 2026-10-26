@@ -106,7 +106,7 @@
   <script src="./api-client.js"></script>
   <script>
     const PAGES=[['overview','總覽','⌂'],['trade','交易/庫存','⇄'],['dividends','存股配息','▤'],['watch','觀察名單','◉']];
-    let active='overview',portfolio=null,watchData=null,watchFilter='all',tradeType='cash',pendingTrade=null;
+    let active='overview',portfolio=null,watchData=null,watchFilter='all',tradeType='cash',pendingTrade=null,screenWakeLock=null,wakeLockRequest=null,resumeTimer=0,refreshPromise=null;
     const $=id=>document.getElementById(id),money=n=>n==null?'—':Number(n).toLocaleString('zh-TW',{maximumFractionDigits:2}),signed=n=>n==null?'—':(n>0?'+':'')+money(n),pct=n=>n==null?'—':(n>0?'+':'')+Number(n).toFixed(2)+'%';
     function boot(){
       $('bottomNav').innerHTML=PAGES.map(([id,label,ico])=>`<button class="${active===id?'active':''}" onclick="showPage('${id}')"><span class="ico">${ico}</span>${label}</button>`).join('');
@@ -115,11 +115,72 @@
       $('watchSearch').addEventListener('input',renderWatchlist);
       $('watchFilters').addEventListener('click',e=>{const b=e.target.closest('button[data-filter]');if(!b)return;watchFilter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));renderWatchlist();});
       $('qty').addEventListener('input',calculateAmount);$('price').addEventListener('input',calculateAmount);
-      initializePwaAuth();setInterval(()=>{if(isPwaAuthenticated())refreshAll()},60000);
+      initializePwaAuth();
+      requestScreenWakeLock();
+      document.addEventListener('visibilitychange',handleVisibilityChange);
+      window.addEventListener('pageshow',event=>{if(event.persisted)handleForegroundResume()});
+      setInterval(()=>{if(document.visibilityState==='visible'&&isPwaAuthenticated())refreshAll()},60000);
+    }
+    function requestScreenWakeLock(){
+      if(document.visibilityState!=='visible'||!('wakeLock' in navigator))return Promise.resolve();
+      if(screenWakeLock&&!screenWakeLock.released)return Promise.resolve();
+      if(wakeLockRequest)return wakeLockRequest;
+      try{
+        wakeLockRequest=navigator.wakeLock.request('screen').then(lock=>{
+          if(document.visibilityState!=='visible'){lock.release().catch(()=>{});return;}
+          screenWakeLock=lock;
+          lock.addEventListener('release',()=>{if(screenWakeLock===lock)screenWakeLock=null},{once:true});
+        }).catch(()=>{screenWakeLock=null;}).finally(()=>{wakeLockRequest=null;});
+      }catch(_){screenWakeLock=null;wakeLockRequest=null;return Promise.resolve();}
+      return wakeLockRequest;
+    }
+    function handleVisibilityChange(){
+      if(document.visibilityState!=='visible'){
+        window.clearTimeout(resumeTimer);resumeTimer=0;
+        if(screenWakeLock){const lock=screenWakeLock;screenWakeLock=null;lock.release().catch(()=>{});}
+        return;
+      }
+      handleForegroundResume();
+    }
+    function handleForegroundResume(){
+      if(document.visibilityState!=='visible')return;
+      requestScreenWakeLock();
+      window.clearTimeout(resumeTimer);
+      resumeTimer=window.setTimeout(()=>{
+        resumeTimer=0;
+        if(isPwaAuthenticated())refreshAll();
+      },250);
     }
     function showPage(id){active=id;document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id==='page-'+id));document.querySelectorAll('.bottom-nav button').forEach((x,i)=>x.classList.toggle('active',PAGES[i][0]===id));window.scrollTo(0,0);if(id==='watch'&&!watchData)loadWatchlist();if(id==='overview'&&portfolio){const h=(portfolio.holdings||[]).filter(x=>Number(x.shares||0)>0);renderOverview(portfolio.summary||[],h,portfolio.assetTotal);drawPnl(portfolio.pnlHistory||[])}if(id==='dividends'&&portfolio)renderDividends(portfolio.dividends||{},(portfolio.holdings||[]).filter(x=>Number(x.shares||0)>0));}
     function serverCall(name,...args){return window.apiCall(name,...args);}
-    async function refreshAll(){if(!isPwaAuthenticated()){document.getElementById('sync').textContent='請先登入';return} document.getElementById('sync').textContent='同步中…';try{const data=await serverCall('getPortfolioData');if(!isPwaAuthenticated())return;if(!data.ok)throw Error(data.error);portfolio=data;renderPortfolio();$('sync').textContent='已連線';$('updated').textContent='更新時間：'+new Date(data.updatedAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});}catch(e){clearPrivateData();$('sync').textContent='同步失敗';showError('summary',e.message)}loadWatchlist();}
+    function refreshAll(){
+      if(refreshPromise)return refreshPromise;
+      if(!isPwaAuthenticated())return Promise.resolve();
+      refreshPromise=(async()=>{
+        $('sync').textContent='同步中…';
+        try{
+          const data=await serverCall('getPortfolioData');
+          if(!isPwaAuthenticated())return;
+          if(!data.ok)throw Error(data.error);
+          portfolio=data;renderPortfolio();$('sync').textContent='已連線';
+          $('updated').textContent='更新時間：'+new Date(data.updatedAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+          await loadWatchlist();
+        }catch(e){
+          if(e.staleAuthResponse&&isPwaAuthenticated()){
+            $('sync').textContent='已重新登入 · 正在同步';
+            window.setTimeout(()=>refreshAll(),0);
+            return;
+          }
+          clearPrivateData();
+          if(!isPwaAuthenticated()){
+            const message='登入授權已失效或權限需確認，請按「登入」重新授權。';
+            $('sync').textContent='請重新登入';showError('summary',message);return;
+          }
+          $('sync').textContent='同步失敗';showError('summary',e.message);
+        }
+      })().finally(()=>{refreshPromise=null});
+      return refreshPromise;
+    }
     function showError(id,message){const target=$(id);if(target){target.innerHTML=`<div class="empty">${escapeHtml(message||'資料讀取失敗')}</div>`;return}const hero=$('metric-net-equity');if(hero)hero.textContent='資料讀取失敗';const meta=$('historyMeta');if(meta)meta.textContent=message||'請稍後重新整理。'}
     function renderPortfolio(){
       renderStockOptions(portfolio.stockOptions||[]);

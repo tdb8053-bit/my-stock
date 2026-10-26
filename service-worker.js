@@ -1,4 +1,4 @@
-const CACHE_NAME='asset-manager-github-shell-v3';
+const CACHE_NAME='asset-manager-github-shell-v4';
 const SHELL=['./','./index.html','./manifest.webmanifest','./api-client.js','./icon-asset-manager-192.png','./icon-asset-manager-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
