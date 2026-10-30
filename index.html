@@ -38,11 +38,10 @@
     .table th,.table td{padding:10px 7px;line-height:1.35}
     .scroll-x,.watch-results{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
     #monthlyDividendTable{width:100%;min-width:0;overflow:hidden}
-    .month-table{width:max-content;min-width:520px;table-layout:auto}
-    .month-table th,.month-table td{white-space:nowrap;overflow:visible;text-overflow:clip}
-    .month-table .total-row td{font-size:clamp(12px,3.4vw,14px)}
     /* Keep all four dividend columns visible on typical phones, with a swipe fallback on very narrow screens. */
     .month-table{width:100%;min-width:0;table-layout:fixed;font-size:clamp(16px,4.4vw,18px)}
+    #monthlyDividendTable .month-table{display:table!important;width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
+    #monthlyDividendTable .month-table th,#monthlyDividendTable .month-table td{text-align:center!important;box-sizing:border-box}
     .month-table th,.month-table td{padding:5px 1px;overflow:hidden;text-overflow:clip}
     .month-table thead th{font-size:clamp(16px,4.4vw,18px)}
     .month-table .total-row td,.month-table tbody tr:not(.total-row) td:not(.month-name){font-size:clamp(16px,4.4vw,18px)}
