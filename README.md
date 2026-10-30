@@ -1,29 +1,48 @@
-# GitHub Pages 資產總管
+# 資產總管 Apps Script 本機來源套件
 
-這是 Apps Script HTML 版以外的 GitHub Pages 套件。上傳本資料夾內的全部檔案到既有 GitHub repository 啟用 Pages；不要只替換 `index.html`，也不要上傳 placeholder 以外的憑證。
+這是使用新版「資產總管」Google 試算表的手機版網頁來源。原本的 `index.html` 與 `index_月度配息捲動與0軸紅線版.html` 沒有修改，已移至專案的 `備份/2026-10-17-整理前/`。此套件目前只在本機，沒有建立雲端專案、沒有部署，也沒有修改任何試算表。
 
-## 目前狀態
+## 功能
 
-- `index.html` 是 GitHub Pages 專用介面；它透過 OAuth 和 Apps Script API 讀取私密試算表並記錄交易。
-- Apps Script API 原始碼在 `../apps-script/pwa-api/`，需要先由您建立並部署 owner-only API executable。
-- `config.example.js` 目前只有 placeholder。GitHub Pages 要能使用前，您必須以實際 OAuth Web Client ID 和 API executable deployment ID 更新這份公開設定；兩者屬公開識別資料，不能放入 client secret 或 access token。
-- 本機套件完成不代表 Google Cloud、OAuth、Apps Script API 或 GitHub Pages 已部署。
+- **總覽**：資產總額直接讀新版 `總覽!D5`，並顯示損益摘要、資金卡、持股配置圖及歷史損益圖；摘要文字置中、數字略縮小，持股總市值不再顯示持股檔數。持股漲跌幅依 `總覽!I3:I4` 的百分比格式顯示，零庫存不列入配置圖。
+- **交易/庫存**：代號下拉選項合併目前持股與 `交易記錄` 曾出現的代號並去重；新代號可選「輸入其他代號」。日期、現股/融資、股數、成交價、金額及融資欄位需先確認，確認後只把資料登記到新版 `交易記錄`，不會送出券商委託。
+- **存股配息**：累計總配息直接讀新版 `存股配息!O2`，依新版 `總覽` 在庫持股顯示股票卡；月度明細讀取月份 `A7:A`、00400A 配息 `E7:E`、00406A 配息 `L7:L`，依月份由舊到新排列（從 2026/07 起）。四欄壓縮至手機寬度，數字依畫面寬度放大，合計列置於月份明細最上方。零庫存不顯示，沒有來源的年化估算顯示資料不足，不沿用截圖示例金額。
+- **捷徑圖示**：`Index.html` 內嵌本 Apps Script 資料夾中的 `icon-gold-coin-192.png` 圖示資料，供支援的手機捷徑圖示標記使用。Apps Script 的 `HtmlOutput.setFaviconUrl()` 不接受 `data:image/...` 內嵌資料，因此 `doGet()` 只會在圖示是可公開存取的 HTTPS 圖檔網址時才設定瀏覽器 favicon；本機內嵌圖示不會傳入該方法。
+- **觀察名單**：僅顯示股票代號；加權指數固定置頂作基準。只列出同時有 2026/07/30 歷史收盤與最新收盤的代號；缺價項目不顯示。可搜尋代號、按漲幅或跌幅排序，並以「較加權」欄比較區間漲跌幅。報價為盤後收盤資料，不稱作即時報價。
+- 每 60 秒更新一次，也可手動更新。
+- 保留月度配息明細的水平捲動與損益圖紅色 0 軸；手機版小字調大，寬表在表格區內橫向捲動，避免壓縮到重疊。
 
-## 您需要在 Google 帳戶完成的設定
+## 匯入 Apps Script
 
-1. 依 `../apps-script/pwa-api/README.md` 建立獨立 API Apps Script 專案、Script Property，並檢查必要工作表。
-2. 將 API 專案和 OAuth 用戶端關聯到同一個標準 Google Cloud 專案並啟用 Apps Script API。
-3. 建立 OAuth Web Client，將最終 GitHub Pages 網域加入「已授權的 JavaScript 來源」；同意畫面先限制您的擁有者帳戶。
-4. 檢查 Apps Script 專案 Overview 顯示的完整 OAuth scopes，確認符合 `config.example.js`，再建立 `MYSELF` API executable deployment。
-5. 把實際 OAuth Client ID 與 API deployment ID 填入 `config.example.js`。不要把 client secret、token、Sheet ID 或帳務資料放入本資料夾。
-6. 確認 repository 可見內容只含程式和公開圖示，再把本資料夾全部檔案上傳到 repository 根目錄並啟用 GitHub Pages。
+1. 在新版「資產總管」試算表開啟「擴充功能 > Apps Script」。
+2. 將 `Code.gs`、`MarketData.gs` 及 `Index.html` 分別建立為同名檔案；將 `appsscript.json` 內容放入專案資訊清單。`Migration.gs` 不屬於本次採用的功能，無須匯入。
+3. 到「專案設定 > 指令碼屬性」加入 `ASSET_MANAGER_SPREADSHEET_ID`，值填第二份試算表 ID：`1fiDkEah6FL-2HKP8bBNn-lqcFQNgk9S2F_2oppIvvy0`。這個 ID 只設定在 Apps Script 屬性，不要寫入 HTML。
+4. 在編輯器執行 `setupPrivateApp` 一次並完成 Google 授權。這會確認必要分頁、建立 `每日損益紀錄`（若尚未存在）並建立台北時間每日約 14:10 的快照觸發器。
+5. 手動部署 Web App 時，執行身分選自己，存取權選「只有我自己」。部署前再次核對登入帳號和存取權限。
 
-Apps Script API 執行要求 API 專案與 OAuth 用戶端共用標準 Cloud 專案、啟用 Apps Script API，且 access token 涵蓋 API 專案全部 scopes。請先檢視 Google 授權頁列出的權限；不要略過未驗證應用程式或權限警告。
+## 每日損益歷史
 
-## 使用與資料安全
+每日快照寫入新版 `每日損益紀錄`，欄位為日期、實際記錄時間、本期損益；同一台灣日期只記一筆。讀取圖表時會略過工作表中的說明列、重複表頭、空白日期及空白損益，不會把未來預填日期當成 0。使用者已選擇從新版開始有有效資料時累積，不要求回找或補造歷史資料。觸發器會確認證交所 ETF 資料日期是今天，非交易日或缺少可用損益時略過。Apps Script 的定時觸發時間是近似時間，非保證精確 14:10。
 
-- 開啟 GitHub Pages 後按「登入」，以擁有新版資產總管試算表的 Google 帳戶授權。登出或頁面重載後須重新登入；access token 只留在頁面記憶體。
-- API deployment 必須限制為 `MYSELF`。試算表保持私密，前端不使用公開 GViz 查詢。
-- Service worker 只快取靜態頁面、公開設定、程式和圖示；不快取 OAuth、Apps Script API 回應或金融資料。
-- 交易需先確認，之後只寫入試算表，不會送出券商委託。遇到結果待核對提示時，先檢查交易記錄，不要重複送出。
-- 新版 `index.html` 不會改動或取代 `apps-script/Index.html` Apps Script 網頁版。
+本次採用「不回找、不匯入舊表歷史」的方式。圖表讀取新版帳本內已有的有效數值；新版出現第一筆新快照後再繼續累積。不要設定 `LEGACY_SPREADSHEET_ID`，也不要執行 `Migration.gs` 的舊表匯入函式。
+
+## 觀察名單來源
+
+由 Apps Script `UrlFetchApp` 讀取臺灣證券交易所 `MI_INDEX` 官方公開 JSON：ETF 用 `type=0099P`，發行量加權股價指數用 `type=IND`。日期為 2026-07-30 的 ETF 收盤價和指數，以及最近有資料日期的收盤價/點數會分開抓取。缺少歷史或最新收盤的 ETF 會略過；加權指數固定保留在清單首列。回應快取 5 分鐘以降低請求量；來源是盤後資料，更新頻率受交易所發布及 Apps Script 執行影響。
+
+## 欄位與操作限制
+
+- 交易表在 `交易記錄` 第 11 列有完整 A:M 表頭；先找 A:K 最後一筆實際交易，跳過公式預填列。新列的 I 欄以「淨收款＋償還融資」計算成交價，L 欄依前序買進均價計算已實現損益，M 欄沿用庫存公式；新交易寫入 A:H 與 J:K，不覆蓋 I/L/M 計算欄。總計使用開放範圍公式時，程式會沿用 M 欄公式並補上新列計算；到達工作表列數上限後才停止寫入。賣出前也會核對新版總覽庫存，避免超量賣出。
+- `總覽` 工作表現有的已實現損益公式只連到既有賣出列，因此網頁會優先加總 `交易記錄` L 欄逐筆已實現損益公式的結果。新版式已移除部分舊明細、只保留結果數字；若總覽的已實現損益儲存格不是連結至交易記錄 L 欄的公式，程式會把該數值當作舊資料基準保留，並在有新交易明細時加上新損益，避免遺漏或覆蓋。Apps Script 不會自行改寫試算表的其他摘要公式。
+- 請先核對新版表頭、公式與權限，再部署。若表格欄位已改動，停止使用交易寫入功能並先調整欄位對應。
+- 交易請求使用鎖及請求識別碼防止重複追加；若結果不確定，先查交易表，勿直接重送。
+- 私密部署的選項由部署者在 Apps Script UI 設定；程式碼不會自行建立或發布 Web App。
+
+## 權限
+
+資訊清單要求試算表存取、外部 HTTP 請求（TWSE 報價）及建立時間觸發器的授權。請只在使用者自己的 Apps Script 帳戶與新版試算表中授權；不要公開部署，也不要分享含有 Script Properties 的專案。
+
+## GitHub Pages 版本
+
+若要從 GitHub Pages 使用相同介面並保留交易寫入，請使用專用的 `../github-pages/` 套件及 `apps-script/pwa-api/` 獨立 API 專案，不要將本 Apps Script 專用的 `Index.html` 直接覆蓋到 GitHub。API 與 OAuth/Cloud 設定、`MYSELF` API executable 部署及 GitHub 上傳步驟請依兩個套件各自的 README 操作；本機來源不代表已部署。
+
